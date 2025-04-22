@@ -19,6 +19,7 @@ import TournamentDetailPage from "@/pages/TournamentDetailPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ProfilePage from "@/pages/ProfilePage";
+import AdminDashboard from "@/pages/admin/Dashboard";
 
 // Auth context
 import { useAuth } from "@/context/AuthContext";
@@ -65,11 +66,10 @@ function Router() {
             {() => <ProtectedRoute component={ProfilePage} />}
           </Route>
           
-          {/* Admin Routes - Currently disabled 
+          {/* Admin Routes */}
           <Route path="/admin">
-            {() => <ProtectedRoute component={NotFound} adminOnly={true} />}
+            {() => <ProtectedRoute component={AdminDashboard} adminOnly={true} />}
           </Route>
-          */}
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
