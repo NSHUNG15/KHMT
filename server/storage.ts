@@ -138,7 +138,7 @@ export class MemStorage implements IStorage {
     // Add initial admin user
     this.createUser({
       username: "admin",
-      password: "$2b$10$KYfXkzhkLJyK4KF3ABSmP.m3YCnXZAkVdpT6n4u6JKXcI/x7KZUbK", // password: admin123
+      password: "$2b$10$nSLvU6.9zlxGc5qjFGlhke9BVcaBQYQFhBJ9QUvQKM1W5i1cCZ37W", // password: admin
       email: "admin@dtu.edu.vn",
       fullName: "Admin",
       faculty: "Computer Science",
