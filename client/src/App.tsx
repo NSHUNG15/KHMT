@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,20 +27,27 @@ import { useAuth } from "@/context/AuthContext";
 // Protected Route component
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType, adminOnly?: boolean }) {
   const { user, loading } = useAuth();
+  const [, navigate] = useLocation();
+  
+  console.log("ProtectedRoute - User:", user, "Loading:", loading, "AdminOnly:", adminOnly);
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
-    window.location.href = "/login";
-    return null;
+    console.log("User not authenticated, redirecting to login");
+    // Use hook instead of direct location change
+    navigate("/login");
+    return <div className="min-h-screen flex items-center justify-center">Redirecting to login...</div>;
   }
   
   if (adminOnly && user.role !== "admin") {
+    console.log("User not admin, access denied");
     return <NotFound />;
   }
   
+  console.log("Rendering protected component");
   return <Component />;
 }
 

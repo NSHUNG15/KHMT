@@ -31,13 +31,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadUser() {
       try {
+        console.log("Attempting to load user");
         const response = await fetch('/api/auth/me', {
           credentials: 'include'
         });
         
+        console.log("Load user response status:", response.status);
+        
         if (response.ok) {
           const userData = await response.json();
+          console.log("User data loaded:", userData);
           setUser(userData);
+        } else {
+          console.log("Not authenticated, status:", response.status);
         }
       } catch (error) {
         console.error("Failed to load user:", error);
