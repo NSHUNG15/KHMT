@@ -20,27 +20,39 @@ const AdminDashboard = () => {
   const [selectedContentTab, setSelectedContentTab] = useState<string | null>(null);
 
   // Fetch summary data
-  const { data: userCount = 0 } = useQuery({
-    queryKey: ['/api/users/count'],
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ['/api/users'],
     staleTime: 60000,
   });
+  const userCount = users.length;
 
-  const { data: activeEvents = 0 } = useQuery({
-    queryKey: ['/api/events/count', { status: 'active' }],
+  const { data: events = [] } = useQuery<any[]>({
+    queryKey: ['/api/events'],
     staleTime: 60000,
   });
+  const activeEvents = events.filter((event: any) => 
+    new Date(event.endDate) >= new Date() && event.isPublished
+  ).length;
 
-  const { data: activeTournaments = 0 } = useQuery({
-    queryKey: ['/api/tournaments/count', { status: 'ongoing' }],
+  const { data: tournaments = [] } = useQuery<any[]>({
+    queryKey: ['/api/tournaments'],
     staleTime: 60000,
   });
+  const activeTournaments = tournaments.filter((tournament: any) => 
+    tournament.status === 'ongoing'
+  ).length;
 
-  const { data: newAnnouncements = 0 } = useQuery({
-    queryKey: ['/api/announcements/count', { days: 7 }],
+  const { data: announcements = [] } = useQuery<any[]>({
+    queryKey: ['/api/announcements'],
     staleTime: 60000,
   });
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const newAnnouncements = announcements.filter((announcement: any) => 
+    new Date(announcement.createdAt) >= oneWeekAgo
+  ).length;
 
-  const { data: recentEvents = [] } = useQuery({
+  const { data: recentEvents = [] } = useQuery<any[]>({
     queryKey: ['/api/events', { limit: 5, upcoming: true }],
     staleTime: 60000,
   });
@@ -178,7 +190,7 @@ const AdminDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{userCount || 0}</div>
+                <div className="text-3xl font-bold">{userCount}</div>
                 <Users className="w-4 h-4 text-muted-foreground mt-1" />
               </CardContent>
             </Card>
@@ -190,7 +202,7 @@ const AdminDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{activeEvents || 0}</div>
+                <div className="text-3xl font-bold">{activeEvents}</div>
                 <Calendar className="w-4 h-4 text-muted-foreground mt-1" />
               </CardContent>
             </Card>
