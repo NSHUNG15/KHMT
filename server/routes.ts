@@ -407,43 +407,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Event Registration routes
-  app.get("/api/events/registrations", isAdmin, async (req, res) => {
-    try {
-      // Get all events
-      const events = await storage.listEvents();
-      // Get registrations for each event
-      const allRegistrations = [];
-      
-      for (const event of events) {
-        const eventRegistrations = await storage.listEventRegistrations(event.id);
-        for (const registration of eventRegistrations) {
-          // Get user info
-          const user = await storage.getUser(registration.userId);
-          
-          // Add event and user info to each registration
-          allRegistrations.push({
-            ...registration,
-            event: event,
-            user: user ? {
-              id: user.id,
-              username: user.username,
-              fullName: user.fullName,
-              email: user.email,
-              faculty: user.faculty,
-              studentId: user.studentId,
-              major: user.major
-            } : null
-          });
-        }
-      }
-      
-      res.status(200).json(allRegistrations);
-    } catch (error) {
-      console.error("Error retrieving all registrations:", error);
-      res.status(500).json({ message: "Error retrieving registrations" });
-    }
-  });
-  
   app.get("/api/events/:eventId/registrations", isAdmin, async (req, res) => {
     try {
       const eventId = parseInt(req.params.eventId, 10);
