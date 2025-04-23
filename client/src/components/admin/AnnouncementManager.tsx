@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MoreHorizontal, Plus, Pencil, Trash, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +47,7 @@ const AnnouncementManager = () => {
   // Form states
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState("general");
   const [isPublished, setIsPublished] = useState(true);
 
   // Announcements query
@@ -127,6 +129,7 @@ const AnnouncementManager = () => {
   const resetForm = () => {
     setTitle("");
     setContent("");
+    setCategory("general");
     setIsPublished(true);
   };
 
@@ -134,6 +137,7 @@ const AnnouncementManager = () => {
     setSelectedAnnouncement(announcement);
     setTitle(announcement.title);
     setContent(announcement.content);
+    setCategory(announcement.category);
     setIsPublished(announcement.isPublished);
     setIsEditDialogOpen(true);
   };
