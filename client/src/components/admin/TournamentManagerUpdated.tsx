@@ -300,12 +300,13 @@ const TournamentManager = () => {
       }
       
       // Tạo giải đấu với biểu mẫu (nếu có)
+      // Chuyển đổi các đối tượng Date thành chuỗi ISO để tương thích với schema
       createTournamentMutation.mutate({
         name,
         description,
-        startDate,
-        endDate,
-        registrationDeadline,
+        startDate: startDate ? startDate.toISOString() : undefined,
+        endDate: endDate ? endDate.toISOString() : undefined,
+        registrationDeadline: registrationDeadline ? registrationDeadline.toISOString() : undefined,
         sportType,
         format,
         maxTeams: maxTeams || null,
@@ -348,14 +349,15 @@ const TournamentManager = () => {
         });
       }
       
+      // Chuyển đổi các đối tượng Date thành chuỗi ISO để tương thích với schema
       updateTournamentMutation.mutate({
         id: selectedTournament.id,
         tournamentData: {
           name,
           description,
-          startDate,
-          endDate,
-          registrationDeadline,
+          startDate: startDate ? startDate.toISOString() : undefined,
+          endDate: endDate ? endDate.toISOString() : undefined,
+          registrationDeadline: registrationDeadline ? registrationDeadline.toISOString() : undefined,
           sportType,
           format,
           maxTeams: maxTeams || null,
