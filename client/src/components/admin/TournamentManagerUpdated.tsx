@@ -411,8 +411,8 @@ const TournamentManager = () => {
     setIsBracketGenDialogOpen(true);
   };
 
-  function formatDate(date: Date, formatStr: string) {
-    return format(date, formatStr);
+  function formatDate(date: Date | string, formatStr: string) {
+    return format(new Date(date), formatStr);
   }
 
   return (
