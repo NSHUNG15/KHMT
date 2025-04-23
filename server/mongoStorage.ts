@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   User, InsertUser,
   Announcement, InsertAnnouncement,
@@ -112,8 +113,13 @@ export class MongoStorage implements IStorage {
 
   async connectToDatabase() {
     try {
-      await mongoose.connect('mongodb://localhost:27017/dtu_union');
-      console.log('Connected to MongoDB');
+      // Create an in-memory MongoDB server
+      const mongod = await MongoMemoryServer.create();
+      const uri = mongod.getUri();
+      
+      // Connect to the in-memory server
+      await mongoose.connect(uri);
+      console.log('Connected to in-memory MongoDB');
     } catch (error) {
       console.error('MongoDB connection error:', error);
     }

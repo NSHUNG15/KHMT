@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import mongoose from 'mongoose';
+import { seedAdminUser } from './utils/adminSeeder';
 
 const app = express();
 app.use(express.json());
@@ -46,6 +48,18 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
+
+  // Register count routes
+  try {
+    // Import and register count routes
+    const { registerCountsRoutes } = await import('./utils/countsRoutes');
+    registerCountsRoutes(app);
+    
+    // Seed admin user
+    await seedAdminUser();
+  } catch (error) {
+    console.error('Error setting up MongoDB or registering routes:', error);
+  }
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
