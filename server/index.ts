@@ -8,6 +8,9 @@ import dotenv from "dotenv";
 // Load environment variables from .env file
 dotenv.config();
 
+// Set NODE_ENV if not already set
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
