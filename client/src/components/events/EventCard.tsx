@@ -14,11 +14,39 @@ interface EventCardProps {
 
 const EventCard = ({ event, variant = "default" }: EventCardProps) => {
   const now = new Date();
-  const startDate = new Date(event.startDate);
-  const registrationDeadline = event.registrationDeadline ? new Date(event.registrationDeadline) : null;
-  const isUpcoming = startDate > now;
+  
+  // Xử lý an toàn các giá trị ngày tháng
+  let startDate: Date | null = null;
+  let endDate: Date | null = null;
+  let registrationDeadline: Date | null = null;
+  
+  try {
+    if (event.startDate) {
+      startDate = new Date(event.startDate);
+    }
+  } catch (error) {
+    console.error("Invalid startDate format:", error, event.startDate);
+  }
+  
+  try {
+    if (event.endDate) {
+      endDate = new Date(event.endDate);
+    }
+  } catch (error) {
+    console.error("Invalid endDate format:", error, event.endDate);
+  }
+  
+  try {
+    if (event.registrationDeadline) {
+      registrationDeadline = new Date(event.registrationDeadline);
+    }
+  } catch (error) {
+    console.error("Invalid registrationDeadline format:", error, event.registrationDeadline);
+  }
+  
+  const isUpcoming = startDate ? startDate > now : false;
   const isRegistrationClosed = registrationDeadline ? now > registrationDeadline : false;
-  const isEventOver = now > new Date(event.endDate);
+  const isEventOver = endDate ? now > endDate : false;
 
   // Get registration status
   const { data: registrations } = useQuery({

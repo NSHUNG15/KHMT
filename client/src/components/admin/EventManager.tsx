@@ -195,9 +195,41 @@ const EventManager = () => {
     setTitle(event.title);
     setDescription(event.description);
     setLocation(event.location);
-    setStartDate(new Date(event.startDate));
-    setEndDate(new Date(event.endDate));
-    setRegistrationDeadline(event.registrationDeadline ? new Date(event.registrationDeadline) : undefined);
+    
+    // Xử lý an toàn ngày tháng, tránh lỗi "Invalid time value"
+    if (event.startDate) {
+      try {
+        setStartDate(new Date(event.startDate));
+      } catch (e) {
+        console.error("Lỗi với startDate:", e);
+        setStartDate(undefined);
+      }
+    } else {
+      setStartDate(undefined);
+    }
+    
+    if (event.endDate) {
+      try {
+        setEndDate(new Date(event.endDate));
+      } catch (e) {
+        console.error("Lỗi với endDate:", e);
+        setEndDate(undefined);
+      }
+    } else {
+      setEndDate(undefined);
+    }
+    
+    if (event.registrationDeadline) {
+      try {
+        setRegistrationDeadline(new Date(event.registrationDeadline));
+      } catch (e) {
+        console.error("Lỗi với registrationDeadline:", e);
+        setRegistrationDeadline(undefined);
+      }
+    } else {
+      setRegistrationDeadline(undefined);
+    }
+    
     setCapacity(event.capacity || 0);
     setIsPublished(event.isPublished);
     
@@ -228,9 +260,19 @@ const EventManager = () => {
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    createEventMutation.mutate({
+    // Lấy dữ liệu người dùng từ localStorage hoặc sử dụng hook auth
+    let createdBy = 1; // Mặc định ID = 1 nếu không tìm thấy
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user && user.id) {
+        createdBy = user.id;
+      }
+    } catch (e) {
+      console.error("Lỗi khi lấy thông tin người dùng:", e);
+    }
+    
+    const eventData = {
       title,
       description,
       location,
@@ -240,27 +282,35 @@ const EventManager = () => {
       capacity: capacity || null,
       isPublished,
       formTemplate: { fields: formFields },
-      createdBy: user.id,
-    });
+      createdBy,
+    };
+    
+    console.log("Submitting event data:", eventData);
+    
+    createEventMutation.mutate(eventData);
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEvent) return;
     
+    const eventData = {
+      title,
+      description,
+      location,
+      startDate,
+      endDate,
+      registrationDeadline,
+      capacity: capacity || null,
+      isPublished,
+      formTemplate: { fields: formFields },
+    };
+    
+    console.log("Updating event data:", eventData);
+    
     updateEventMutation.mutate({
       id: selectedEvent.id,
-      eventData: {
-        title,
-        description,
-        location,
-        startDate,
-        endDate,
-        registrationDeadline,
-        capacity: capacity || null,
-        isPublished,
-        formTemplate: { fields: formFields },
-      },
+      eventData,
     });
   };
 
@@ -322,7 +372,9 @@ const EventManager = () => {
                 {events.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
-                    <TableCell>{format(new Date(event.startDate), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>
+                      {event.startDate ? format(new Date(event.startDate), "dd/MM/yyyy") : "Chưa xác định"}
+                    </TableCell>
                     <TableCell>{event.location}</TableCell>
                     <TableCell className="text-center">
                       <Button 

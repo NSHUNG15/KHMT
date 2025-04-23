@@ -7,20 +7,44 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date | string | number): string {
-  return format(new Date(date), "dd/MM/yyyy", { locale: vi });
+export function formatDate(date: Date | string | number | null | undefined): string {
+  if (!date) return "Chưa xác định";
+  try {
+    return format(new Date(date), "dd/MM/yyyy", { locale: vi });
+  } catch (error) {
+    console.error("Error formatting date:", error, date);
+    return "Định dạng không hợp lệ";
+  }
 }
 
-export function formatDateTime(date: Date | string | number): string {
-  return format(new Date(date), "HH:mm - dd/MM/yyyy", { locale: vi });
+export function formatDateTime(date: Date | string | number | null | undefined): string {
+  if (!date) return "Chưa xác định";
+  try {
+    return format(new Date(date), "HH:mm - dd/MM/yyyy", { locale: vi });
+  } catch (error) {
+    console.error("Error formatting date time:", error, date);
+    return "Định dạng không hợp lệ";
+  }
 }
 
-export function formatTimeOnly(date: Date | string | number): string {
-  return format(new Date(date), "HH:mm", { locale: vi });
+export function formatTimeOnly(date: Date | string | number | null | undefined): string {
+  if (!date) return "Chưa xác định";
+  try {
+    return format(new Date(date), "HH:mm", { locale: vi });
+  } catch (error) {
+    console.error("Error formatting time:", error, date);
+    return "Định dạng không hợp lệ";
+  }
 }
 
-export function formatRelativeTime(date: Date | string | number): string {
-  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: vi });
+export function formatRelativeTime(date: Date | string | number | null | undefined): string {
+  if (!date) return "Chưa xác định";
+  try {
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: vi });
+  } catch (error) {
+    console.error("Error formatting relative time:", error, date);
+    return "Định dạng không hợp lệ";
+  }
 }
 
 export function truncateText(text: string, maxLength: number): string {
