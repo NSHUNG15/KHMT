@@ -109,14 +109,27 @@ const EventManager = () => {
       const res = await apiRequest('PATCH', `/api/events/${id}`, eventData);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedEvent, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/events'] });
-      toast({
-        title: "Cập nhật sự kiện thành công",
-        description: "Sự kiện đã được cập nhật",
-      });
-      resetForm();
-      setIsEditDialogOpen(false);
+      
+      // Phân biệt cập nhật thông thường và cập nhật biểu mẫu
+      const isFormUpdate = Object.keys(variables.eventData).length === 1 && 
+                         variables.eventData.formTemplate !== undefined;
+                         
+      if (!isFormUpdate) {
+        // Đối với cập nhật thông thường, đóng dialog và hiển thị thông báo
+        toast({
+          title: "Cập nhật sự kiện thành công",
+          description: "Sự kiện đã được cập nhật",
+        });
+        resetForm();
+        setIsEditDialogOpen(false);
+        // Đảm bảo đóng cả hai dialog
+        setIsFormUpdateOpen(false);
+      }
+      
+      // Không đóng dialog cập nhật biểu mẫu ở đây để người dùng có thể tiếp tục thao tác
+      return updatedEvent;
     },
     onError: (error: any) => {
       toast({
@@ -1032,11 +1045,44 @@ const EventManager = () => {
               onClick={() => {
                 if (!selectedEvent) return;
                 
+                const safeFormFields = Array.isArray(formFields) ? formFields : [];
+                console.log("Cập nhật biểu mẫu với trường:", safeFormFields);
+                
                 updateEventMutation.mutate({
                   id: selectedEvent.id,
                   eventData: {
-                    formTemplate: { fields: formFields },
+                    formTemplate: { fields: safeFormFields },
                   },
+                }, {
+                  onSuccess: (updatedEvent) => {
+                    // Hiển thị thông báo
+                    toast({
+                      title: "Cập nhật thành công",
+                      description: "Biểu mẫu đã được cập nhật",
+                    });
+                    
+                    // Cập nhật formFields để phản ánh dữ liệu mới
+                    if (updatedEvent.formTemplate) {
+                      try {
+                        if (typeof updatedEvent.formTemplate === 'object') {
+                          const fields = Array.isArray(updatedEvent.formTemplate.fields) 
+                            ? updatedEvent.formTemplate.fields 
+                            : [];
+                          console.log("Cập nhật formFields sau khi lưu (object):", fields);
+                          setFormFields(fields);
+                        } else if (typeof updatedEvent.formTemplate === 'string') {
+                          const parsedTemplate = JSON.parse(updatedEvent.formTemplate);
+                          const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
+                          console.log("Cập nhật formFields sau khi lưu (string):", fields);
+                          setFormFields(fields);
+                        }
+                      } catch (e) {
+                        console.error("Lỗi khi cập nhật formFields sau khi lưu:", e);
+                      }
+                    }
+                    
+                    // Không đóng dialog để người dùng tiếp tục chỉnh sửa
+                  }
                 });
               }}
             >
