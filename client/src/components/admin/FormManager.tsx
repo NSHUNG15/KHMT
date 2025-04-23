@@ -66,6 +66,16 @@ interface FormField {
   description?: string;
 }
 
+interface CustomForm {
+  id: number;
+  name: string;
+  description: string | null;
+  fields: any;
+  createdBy: number;
+  createdAt: Date;
+  structure?: any;
+}
+
 const FormManager = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -96,7 +106,7 @@ const FormManager = () => {
   };
 
   // Forms query
-  const { data: forms = [], isLoading } = useQuery<CustomForm[]>({
+  const { data: forms = [], isLoading } = useQuery<any[]>({
     queryKey: ['/api/custom-forms'],
     staleTime: 10000,
   });
@@ -1086,14 +1096,14 @@ const FormManager = () => {
               {(() => {
                 try {
                   // Try to get fields directly first
-                  let formFields = [];
+                  let formFields: FormField[] = [];
                   
                   if (selectedForm && Array.isArray(selectedForm.fields)) {
                     console.log("Preview: Using fields directly");
                     formFields = selectedForm.fields;
                   } 
                   // Fall back to structure if needed
-                  else if (selectedForm?.structure) {
+                  else if (selectedForm && selectedForm.structure) {
                     console.log("Preview: Extracting fields from structure");
                     const formStructure = typeof selectedForm.structure === 'string'
                       ? JSON.parse(selectedForm.structure)
