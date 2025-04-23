@@ -19,31 +19,31 @@ const AdminDashboard = () => {
   const [selectedContentTab, setSelectedContentTab] = useState<string | null>(null);
 
   // Fetch summary data
-  const { data: userCountData } = useQuery({
+  const { data: userCountData } = useQuery<{ count: number }>({
     queryKey: ['/api/users/count'],
     staleTime: 60000,
   });
   const userCount = userCountData?.count || 0;
 
-  const { data: activeEventsData } = useQuery({
+  const { data: activeEventsData } = useQuery<{ count: number }>({
     queryKey: ['/api/events/count'],
     staleTime: 60000,
   });
   const activeEvents = activeEventsData?.count || 0;
 
-  const { data: activeTournamentsData } = useQuery({
+  const { data: activeTournamentsData } = useQuery<{ count: number }>({
     queryKey: ['/api/tournaments/count'],
     staleTime: 60000,
   });
   const activeTournaments = activeTournamentsData?.count || 0;
 
-  const { data: newAnnouncementsData } = useQuery({
+  const { data: newAnnouncementsData } = useQuery<{ count: number }>({
     queryKey: ['/api/announcements/count'],
     staleTime: 60000,
   });
   const newAnnouncements = newAnnouncementsData?.count || 0;
 
-  const { data: recentEvents = [] } = useQuery({
+  const { data: recentEvents = [] } = useQuery<any[]>({
     queryKey: ['/api/events', { limit: 5, upcoming: true }],
     staleTime: 60000,
   });

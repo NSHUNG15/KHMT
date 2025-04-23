@@ -30,7 +30,7 @@ export function registerCountsRoutes(app: Express) {
   });
 
   // Get counts of announcements (public route)
-  app.get('/api/announcements/count', async (req, res) => {
+  app.get('/api/announcements/count', isAuthenticated, async (req, res) => {
     try {
       const count = await storage.getCount('announcements');
       res.status(200).json({ count });
@@ -41,7 +41,7 @@ export function registerCountsRoutes(app: Express) {
   });
 
   // Get counts of events (public route)
-  app.get('/api/events/count', async (req, res) => {
+  app.get('/api/events/count', isAuthenticated, async (req, res) => {
     try {
       const count = await storage.getCount('events');
       res.status(200).json({ count });
@@ -52,7 +52,7 @@ export function registerCountsRoutes(app: Express) {
   });
 
   // Get counts of tournaments (public route)
-  app.get('/api/tournaments/count', async (req, res) => {
+  app.get('/api/tournaments/count', isAuthenticated, async (req, res) => {
     try {
       const count = await storage.getCount('tournaments');
       res.status(200).json({ count });
@@ -63,7 +63,7 @@ export function registerCountsRoutes(app: Express) {
   });
 
   // Get counts of forms (public route)
-  app.get('/api/forms/count', async (req, res) => {
+  app.get('/api/forms/count', isAuthenticated, async (req, res) => {
     try {
       const count = await storage.getCount('customForms');
       res.status(200).json({ count });
