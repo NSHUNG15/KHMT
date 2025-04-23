@@ -38,6 +38,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Event } from "@shared/schema";
+import FormBuilder from "@/components/forms/FormBuilder";
+import FormSelector from "@/components/forms/FormSelector";
 
 const EventManager = () => {
   const queryClient = useQueryClient();
@@ -58,6 +60,7 @@ const EventManager = () => {
   const [capacity, setCapacity] = useState<number>(0);
   const [isPublished, setIsPublished] = useState(false);
   const [formTemplate, setFormTemplate] = useState("{}");
+  const [formFields, setFormFields] = useState<any[]>([]);
 
   // Event query
   const { data: events = [], isLoading } = useQuery<Event[]>({
@@ -183,6 +186,7 @@ const EventManager = () => {
     setCapacity(0);
     setIsPublished(false);
     setFormTemplate("{}");
+    setFormFields([]);
   };
 
   const loadEventToEdit = (event: Event) => {
