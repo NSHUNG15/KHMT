@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { MoreHorizontal, Plus, Copy, Pencil, Trash, Eye } from "lucide-react";
+import { MoreHorizontal, Plus, Copy, Pencil, Trash, Eye, FileDown } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 // Using local interface definition instead of imported CustomForm
