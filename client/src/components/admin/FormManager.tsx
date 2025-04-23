@@ -183,17 +183,28 @@ const FormManager = () => {
   const loadFormToEdit = (form: CustomForm) => {
     setSelectedForm(form);
     setName(form.name);
-    setDescription(form.description);
+    setDescription(form.description || "");
     
     try {
-      // Parse fields from structure JSON
-      const formStructure = typeof form.structure === 'string' 
-        ? JSON.parse(form.structure) 
-        : form.structure;
-      
-      setFields(formStructure.fields || []);
+      // Check if fields are directly available in form object
+      if (Array.isArray(form.fields)) {
+        console.log("Loading fields directly from form.fields:", form.fields);
+        setFields(form.fields);
+      } 
+      // Try to fallback to old structure format if needed
+      else if (form.structure) {
+        console.log("Attempting to load fields from structure");
+        const formStructure = typeof form.structure === 'string' 
+          ? JSON.parse(form.structure) 
+          : form.structure;
+        
+        setFields(formStructure.fields || []);
+      } else {
+        console.log("No fields found in form");
+        setFields([]);
+      }
     } catch (e) {
-      console.error("Error parsing form structure:", e);
+      console.error("Error parsing form data:", e);
       setFields([]);
     }
     
@@ -213,17 +224,28 @@ const FormManager = () => {
   const duplicateForm = async (form: CustomForm) => {
     try {
       setName(`${form.name} (Copy)`);
-      setDescription(form.description);
+      setDescription(form.description || "");
       
       try {
-        // Parse fields from structure JSON
-        const formStructure = typeof form.structure === 'string' 
-          ? JSON.parse(form.structure) 
-          : form.structure;
-        
-        setFields(formStructure.fields || []);
+        // Check if fields are directly available in form object
+        if (Array.isArray(form.fields)) {
+          console.log("Duplicating fields directly from form.fields:", form.fields);
+          setFields(form.fields);
+        } 
+        // Try to fallback to old structure format if needed
+        else if (form.structure) {
+          console.log("Attempting to duplicate fields from structure");
+          const formStructure = typeof form.structure === 'string' 
+            ? JSON.parse(form.structure) 
+            : form.structure;
+          
+          setFields(formStructure.fields || []);
+        } else {
+          console.log("No fields found to duplicate");
+          setFields([]);
+        }
       } catch (e) {
-        console.error("Error parsing form structure:", e);
+        console.error("Error parsing form data for duplication:", e);
         setFields([]);
       }
       
@@ -425,11 +447,22 @@ const FormManager = () => {
                     <TableCell>
                       {(() => {
                         try {
-                          const structure = typeof form.structure === 'string'
-                            ? JSON.parse(form.structure)
-                            : form.structure;
-                          return structure.fields?.length || 0;
+                          // Try to get fields directly from form.fields first
+                          if (Array.isArray(form.fields)) {
+                            return form.fields.length;
+                          }
+                          
+                          // Fall back to old structure.fields format if needed
+                          if (form.structure) {
+                            const structure = typeof form.structure === 'string'
+                              ? JSON.parse(form.structure)
+                              : form.structure;
+                            return structure.fields?.length || 0;
+                          }
+                          
+                          return 0;
                         } catch (e) {
+                          console.error("Error parsing form fields:", e);
                           return 0;
                         }
                       })()}
@@ -1052,11 +1085,24 @@ const FormManager = () => {
             <div className="space-y-4">
               {(() => {
                 try {
-                  const formStructure = typeof selectedForm?.structure === 'string'
-                    ? JSON.parse(selectedForm?.structure)
-                    : selectedForm?.structure;
-                    
-                  return (formStructure?.fields || []).map((field: FormField, index: number) => (
+                  // Try to get fields directly first
+                  let formFields = [];
+                  
+                  if (selectedForm && Array.isArray(selectedForm.fields)) {
+                    console.log("Preview: Using fields directly");
+                    formFields = selectedForm.fields;
+                  } 
+                  // Fall back to structure if needed
+                  else if (selectedForm?.structure) {
+                    console.log("Preview: Extracting fields from structure");
+                    const formStructure = typeof selectedForm.structure === 'string'
+                      ? JSON.parse(selectedForm.structure)
+                      : selectedForm.structure;
+                      
+                    formFields = formStructure?.fields || [];
+                  }
+                  
+                  return formFields.map((field: FormField, index: number) => (
                     <div key={index} className="space-y-2">
                       <Label className="font-medium">
                         {field.label}
