@@ -1307,7 +1307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/custom-forms/:id", isAdmin, async (req, res) => {
+  // PATCH endpoint for updating custom forms
+  app.patch("/api/custom-forms/:id", isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
       
