@@ -1,52 +1,43 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose from 'mongoose';
 
-interface ICounter extends Document {
-  _id: string;
-  seq: number;
-}
-
-const counterSchema = new Schema<ICounter>({
-  _id: { type: String, required: true },
-  seq: { type: Number, default: 0 }
+// Define a Counter schema
+const counterSchema = new mongoose.Schema({
+  collectionName: { type: String, required: true, unique: true },
+  sequence_value: { type: Number, default: 0 }
 });
 
-const Counter = mongoose.model<ICounter>('Counter', counterSchema);
+const Counter = mongoose.model('Counter', counterSchema);
 
 /**
- * Generates a counter-based ID for a given collection
- * @param collectionName The name of the collection to generate an ID for
- * @returns A unique numeric ID for the collection
+ * Get the next ID for a given collection
+ * @param collectionName - Name of the collection
+ * @returns The next ID
  */
-export async function generateCounterId(collectionName: string): Promise<number> {
-  const counter = await Counter.findByIdAndUpdate(
-    collectionName,
-    { $inc: { seq: 1 } },
+export const generateCounterId = async (collectionName: string): Promise<number> => {
+  const counter = await Counter.findOneAndUpdate(
+    { collectionName },
+    { $inc: { sequence_value: 1 } },
     { new: true, upsert: true }
   );
-  return counter.seq;
-}
+  return counter.sequence_value;
+};
 
 /**
- * Resets a counter to a specific value
- * @param collectionName The name of the collection to reset
- * @param value The value to set the counter to
- * @returns The new counter value
+ * Get the count of documents in a collection
+ * @param collectionName - Name of the MongoDB collection
+ * @returns The count of documents
  */
-export async function resetCounter(collectionName: string, value: number): Promise<number> {
-  const counter = await Counter.findByIdAndUpdate(
-    collectionName,
-    { seq: value },
-    { new: true, upsert: true }
-  );
-  return counter.seq;
-}
-
-/**
- * Gets the current counter value for a collection
- * @param collectionName The name of the collection
- * @returns The current counter value
- */
-export async function getCurrentCounter(collectionName: string): Promise<number> {
-  const counter = await Counter.findById(collectionName);
-  return counter ? counter.seq : 0;
-}
+export const getCollectionCount = async (collectionName: string): Promise<number> => {
+  try {
+    if (!mongoose.connection.models[collectionName]) {
+      console.log(`Collection ${collectionName} not found`);
+      return 0;
+    }
+    
+    const count = await mongoose.connection.models[collectionName].countDocuments();
+    return count;
+  } catch (error) {
+    console.error(`Error counting ${collectionName}:`, error);
+    return 0;
+  }
+};

@@ -1,5 +1,13 @@
-import { Express, Request, Response } from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
 import { storage } from '../mongoStorage';
+
+// Authentication middleware
+const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Not authenticated' });
+};
 
 /**
  * Registers routes for getting counts of different entities
@@ -7,7 +15,7 @@ import { storage } from '../mongoStorage';
  */
 export function registerCountsRoutes(app: Express) {
   // Get counts of users (for authenticated users, since it's used in admin dashboard)
-  app.get('/api/users/count', async (req, res) => {
+  app.get('/api/users/count', isAuthenticated, async (req, res) => {
     try {
       console.log('Fetching user count');
       const count = await storage.getCount('users');

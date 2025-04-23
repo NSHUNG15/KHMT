@@ -128,17 +128,25 @@ export class MongoStorage implements IStorage {
 
   // Counters
   async getCount(collectionName: string): Promise<number> {
-    switch (collectionName) {
-      case 'users':
-        return await User.countDocuments();
-      case 'announcements':
-        return await Announcement.countDocuments();
-      case 'events':
-        return await Event.countDocuments();
-      case 'tournaments':
-        return await Tournament.countDocuments();
-      default:
-        return 0;
+    try {
+      switch (collectionName) {
+        case 'users':
+          return await User.countDocuments();
+        case 'announcements':
+          return await Announcement.countDocuments();
+        case 'events':
+          return await Event.countDocuments();
+        case 'tournaments':
+          return await Tournament.countDocuments();
+        case 'customForms':
+          return await CustomForm.countDocuments();
+        default:
+          console.log(`Unknown collection name: ${collectionName}`);
+          return 0;
+      }
+    } catch (error) {
+      console.error(`Error counting ${collectionName}:`, error);
+      return 0;
     }
   }
 
