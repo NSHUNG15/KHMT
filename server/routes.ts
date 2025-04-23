@@ -72,11 +72,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Handle MongoDB document structure which may include _doc
     let role = '';
+    
+    console.log("User object for admin check:", JSON.stringify(user));
+    
     if (user._doc && typeof user._doc === 'object') {
       role = user._doc.role;
-    } else {
+      console.log("Using _doc.role:", role);
+    } else if (user.role) {
       role = user.role;
+      console.log("Using user.role:", role);
+    } else {
+      console.log("Role not found in user object");
     }
+    
+    console.log("Final role value:", role);
     
     if (role !== "admin") {
       return res.status(403).json({ message: "Admin access required" });
