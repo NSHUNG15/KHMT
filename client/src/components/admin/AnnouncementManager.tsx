@@ -154,15 +154,21 @@ const AnnouncementManager = () => {
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    createAnnouncementMutation.mutate({
+    const { user } = JSON.parse(localStorage.getItem('userAuth') || '{"user":{"id": 1}}');
+    
+    // Log the data for debugging
+    const newAnnouncement = {
       title,
       content,
       category,
       isPublished,
-      createdBy: user.id,
-    });
+      createdBy: user?.id || 1,
+    };
+    
+    console.log('Creating announcement with data:', newAnnouncement);
+    
+    createAnnouncementMutation.mutate(newAnnouncement);
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
