@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +59,6 @@ const EventManager = () => {
   const [registrationDeadline, setRegistrationDeadline] = useState<Date>();
   const [capacity, setCapacity] = useState<number>(0);
   const [isPublished, setIsPublished] = useState(false);
-  const [formTemplate, setFormTemplate] = useState("{}");
   const [formFields, setFormFields] = useState<any[]>([]);
 
   // Event query
@@ -141,7 +140,7 @@ const EventManager = () => {
   // Registration export mutation
   const exportRegistrationsMutation = useMutation({
     mutationFn: async (eventId: number) => {
-      const res = await apiRequest('GET', `/api/events/${eventId}/export`, {});
+      const res = await apiRequest('GET', `/api/events/${eventId}/registrations/export`, {});
       return res;
     },
     onSuccess: (data) => {
@@ -185,7 +184,6 @@ const EventManager = () => {
     setRegistrationDeadline(undefined);
     setCapacity(0);
     setIsPublished(false);
-    setFormTemplate("{}");
     setFormFields([]);
   };
 
@@ -199,7 +197,24 @@ const EventManager = () => {
     setRegistrationDeadline(event.registrationDeadline ? new Date(event.registrationDeadline) : undefined);
     setCapacity(event.capacity || 0);
     setIsPublished(event.isPublished);
-    setFormTemplate(JSON.stringify(event.formTemplate || {}));
+    
+    try {
+      // Cố gắng phân tích formTemplate từ event
+      if (event.formTemplate && typeof event.formTemplate === 'object') {
+        const fields = event.formTemplate.fields || [];
+        setFormFields(fields);
+      } else if (typeof event.formTemplate === 'string') {
+        const parsedTemplate = JSON.parse(event.formTemplate);
+        const fields = parsedTemplate.fields || [];
+        setFormFields(fields);
+      } else {
+        setFormFields([]);
+      }
+    } catch (e) {
+      console.error("Lỗi khi phân tích biểu mẫu:", e);
+      setFormFields([]);
+    }
+    
     setIsEditDialogOpen(true);
   };
 
@@ -212,18 +227,6 @@ const EventManager = () => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    let formTemplateObj = {};
-    try {
-      formTemplateObj = JSON.parse(formTemplate);
-    } catch (e) {
-      toast({
-        title: "Lỗi cú pháp biểu mẫu",
-        description: "Biểu mẫu JSON không hợp lệ",
-        variant: "destructive",
-      });
-      return;
-    }
-
     createEventMutation.mutate({
       title,
       description,
@@ -233,7 +236,7 @@ const EventManager = () => {
       registrationDeadline,
       capacity: capacity || null,
       isPublished,
-      formTemplate: formTemplateObj,
+      formTemplate: { fields: formFields },
       createdBy: user.id,
     });
   };
@@ -242,18 +245,6 @@ const EventManager = () => {
     e.preventDefault();
     if (!selectedEvent) return;
     
-    let formTemplateObj = {};
-    try {
-      formTemplateObj = JSON.parse(formTemplate);
-    } catch (e) {
-      toast({
-        title: "Lỗi cú pháp biểu mẫu",
-        description: "Biểu mẫu JSON không hợp lệ",
-        variant: "destructive",
-      });
-      return;
-    }
-
     updateEventMutation.mutate({
       id: selectedEvent.id,
       eventData: {
@@ -265,7 +256,7 @@ const EventManager = () => {
         registrationDeadline,
         capacity: capacity || null,
         isPublished,
-        formTemplate: formTemplateObj,
+        formTemplate: { fields: formFields },
       },
     });
   };
@@ -540,29 +531,28 @@ const EventManager = () => {
               
               <TabsContent value="form" className="space-y-4">
                 <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="formTemplate">Mẫu biểu đăng ký (JSON)</Label>
-                    <Textarea 
-                      id="formTemplate" 
-                      value={formTemplate} 
-                      onChange={(e) => setFormTemplate(e.target.value)} 
-                      placeholder='{"fields": [{"name": "fullName", "label": "Họ và tên", "type": "text", "required": true}]}'
-                      rows={10}
+                  <div className="border rounded-md p-4">
+                    <h3 className="text-sm font-medium mb-4">Thiết kế biểu mẫu đăng ký</h3>
+                    <FormBuilder 
+                      onChange={(fields) => {
+                        setFormFields(fields);
+                      }}
+                      initialFields={formFields}
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Định nghĩa các trường dữ liệu cho biểu mẫu đăng ký dưới dạng JSON.
-                    </p>
                   </div>
+                  {formFields.length > 0 && (
+                    <div className="flex items-center p-2 bg-muted rounded-md">
+                      <p className="text-sm text-muted-foreground">
+                        {formFields.length} trường được thêm vào biểu mẫu
+                      </p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
             
             <DialogFooter className="mt-6">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Hủy
               </Button>
               <Button type="submit" disabled={createEventMutation.isPending}>
@@ -579,7 +569,7 @@ const EventManager = () => {
           <DialogHeader>
             <DialogTitle>Chỉnh sửa sự kiện</DialogTitle>
             <DialogDescription>
-              Cập nhật thông tin cho sự kiện
+              Cập nhật thông tin cho sự kiện này
             </DialogDescription>
           </DialogHeader>
           
@@ -594,9 +584,9 @@ const EventManager = () => {
               <TabsContent value="basic" className="space-y-4">
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="title">Tên sự kiện</Label>
+                    <Label htmlFor="edit-title">Tên sự kiện</Label>
                     <Input 
-                      id="title" 
+                      id="edit-title" 
                       value={title} 
                       onChange={(e) => setTitle(e.target.value)} 
                       placeholder="Nhập tên sự kiện"
@@ -605,9 +595,9 @@ const EventManager = () => {
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label htmlFor="description">Mô tả</Label>
+                    <Label htmlFor="edit-description">Mô tả</Label>
                     <Textarea 
-                      id="description" 
+                      id="edit-description" 
                       value={description} 
                       onChange={(e) => setDescription(e.target.value)} 
                       placeholder="Mô tả chi tiết về sự kiện"
@@ -617,9 +607,9 @@ const EventManager = () => {
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label htmlFor="location">Địa điểm</Label>
+                    <Label htmlFor="edit-location">Địa điểm</Label>
                     <Input 
-                      id="location" 
+                      id="edit-location" 
                       value={location} 
                       onChange={(e) => setLocation(e.target.value)} 
                       placeholder="Nhập địa điểm tổ chức"
@@ -628,9 +618,9 @@ const EventManager = () => {
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label htmlFor="capacity">Số lượng tối đa</Label>
+                    <Label htmlFor="edit-capacity">Số lượng tối đa</Label>
                     <Input 
-                      id="capacity" 
+                      id="edit-capacity" 
                       type="number" 
                       value={capacity} 
                       onChange={(e) => setCapacity(parseInt(e.target.value))} 
@@ -641,11 +631,11 @@ const EventManager = () => {
                   
                   <div className="flex items-center space-x-2">
                     <Switch 
-                      id="isPublished" 
+                      id="edit-isPublished" 
                       checked={isPublished} 
                       onCheckedChange={setIsPublished} 
                     />
-                    <Label htmlFor="isPublished">Công bố sự kiện</Label>
+                    <Label htmlFor="edit-isPublished">Công bố</Label>
                   </div>
                 </div>
               </TabsContent>
@@ -734,33 +724,32 @@ const EventManager = () => {
               
               <TabsContent value="form" className="space-y-4">
                 <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="formTemplate">Mẫu biểu đăng ký (JSON)</Label>
-                    <Textarea 
-                      id="formTemplate" 
-                      value={formTemplate} 
-                      onChange={(e) => setFormTemplate(e.target.value)} 
-                      placeholder='{"fields": [{"name": "fullName", "label": "Họ và tên", "type": "text", "required": true}]}'
-                      rows={10}
+                  <div className="border rounded-md p-4">
+                    <h3 className="text-sm font-medium mb-4">Thiết kế biểu mẫu đăng ký</h3>
+                    <FormBuilder 
+                      onChange={(fields) => {
+                        setFormFields(fields);
+                      }}
+                      initialFields={formFields}
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Định nghĩa các trường dữ liệu cho biểu mẫu đăng ký dưới dạng JSON.
-                    </p>
                   </div>
+                  {formFields.length > 0 && (
+                    <div className="flex items-center p-2 bg-muted rounded-md">
+                      <p className="text-sm text-muted-foreground">
+                        {formFields.length} trường được thêm vào biểu mẫu
+                      </p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
             
             <DialogFooter className="mt-6">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsEditDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Hủy
               </Button>
               <Button type="submit" disabled={updateEventMutation.isPending}>
-                {updateEventMutation.isPending ? "Đang cập nhật..." : "Lưu thay đổi"}
+                {updateEventMutation.isPending ? "Đang xử lý..." : "Cập nhật"}
               </Button>
             </DialogFooter>
           </form>
@@ -773,83 +762,82 @@ const EventManager = () => {
           <DialogHeader>
             <DialogTitle>Xác nhận xóa</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa sự kiện "{selectedEvent?.title}"? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa sự kiện "{selectedEvent?.title}" không? 
+              Hành động này không thể hoàn tác.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
+          <DialogFooter className="mt-4">
+            <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Hủy
             </Button>
             <Button 
-              type="button" 
               variant="destructive" 
               onClick={handleDeleteConfirm}
               disabled={deleteEventMutation.isPending}
             >
-              {deleteEventMutation.isPending ? "Đang xóa..." : "Xóa sự kiện"}
+              {deleteEventMutation.isPending ? "Đang xử lý..." : "Xóa"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Registrations View Dialog */}
+      {/* View Registrations Dialog */}
       <Dialog open={isRegistrationViewOpen} onOpenChange={setIsRegistrationViewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Danh sách đăng ký - {selectedEvent?.title}</DialogTitle>
+            <DialogTitle>Đăng ký cho sự kiện: {selectedEvent?.title}</DialogTitle>
             <DialogDescription>
-              Danh sách người tham gia sự kiện
+              Quản lý các đơn đăng ký cho sự kiện này
             </DialogDescription>
           </DialogHeader>
           
           <div className="mt-4">
-            <Button
-              onClick={handleExportRegistrations}
-              disabled={exportRegistrationsMutation.isPending}
-              variant="outline"
-              className="mb-4"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              {exportRegistrationsMutation.isPending ? "Đang xuất..." : "Xuất Excel"}
-            </Button>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-lg font-medium">Danh sách đăng ký</h3>
+                <p className="text-sm text-muted-foreground">
+                  Tổng số: {Array.isArray(registrations) ? registrations.length : 0} đăng ký
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleExportRegistrations}
+                disabled={exportRegistrationsMutation.isPending}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {exportRegistrationsMutation.isPending ? "Đang xuất..." : "Xuất Excel"}
+              </Button>
+            </div>
             
             {registrationsLoading ? (
-              <div className="text-center py-4">Đang tải...</div>
-            ) : registrations.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Chưa có người tham gia đăng ký sự kiện này.
-              </div>
-            ) : (
+              <div className="text-center py-8">Đang tải...</div>
+            ) : Array.isArray(registrations) && registrations.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Tên người dùng</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Thời gian đăng ký</TableHead>
+                    <TableHead>Người dùng</TableHead>
                     <TableHead>Trạng thái</TableHead>
+                    <TableHead>Thời gian đăng ký</TableHead>
                     <TableHead className="text-right">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {registrations.map((registration: any) => (
+                  {Array.isArray(registrations) && registrations.map((registration: any) => (
                     <TableRow key={registration.id}>
-                      <TableCell>{registration.user?.fullName || registration.user?.username}</TableCell>
-                      <TableCell>{registration.user?.email}</TableCell>
-                      <TableCell>{format(new Date(registration.registeredAt), "dd/MM/yyyy HH:mm")}</TableCell>
+                      <TableCell className="font-medium">ID: {registration.userId}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          registration.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
-                          registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
+                          registration.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                          registration.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                          'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {registration.status === 'confirmed' ? 'Đã xác nhận' : 
-                           registration.status === 'pending' ? 'Đang chờ' : 'Từ chối'}
+                          {registration.status === 'approved' ? 'Đã phê duyệt' : 
+                           registration.status === 'rejected' ? 'Từ chối' : 
+                           'Đang chờ'}
                         </span>
                       </TableCell>
+                      <TableCell>{format(new Date(registration.registeredAt), "dd/MM/yyyy HH:mm")}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
@@ -859,17 +847,12 @@ const EventManager = () => {
                   ))}
                 </TableBody>
               </Table>
+            ) : (
+              <div className="text-center py-8 border border-dashed rounded-md">
+                <p className="text-muted-foreground">Chưa có đăng ký nào cho sự kiện này</p>
+              </div>
             )}
           </div>
-          
-          <DialogFooter className="mt-6">
-            <Button 
-              type="button" 
-              onClick={() => setIsRegistrationViewOpen(false)}
-            >
-              Đóng
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

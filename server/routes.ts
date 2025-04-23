@@ -420,6 +420,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add PATCH endpoint for partial updates to events
+  app.patch("/api/events/:id", isAdmin, async (req, res) => {
+    try {
+      console.log("PATCH request received for event with body:", req.body);
+      const id = parseInt(req.params.id, 10);
+      const eventData = req.body.eventData || req.body;
+      
+      // Log the actual data we're using to update
+      console.log("Updating event with ID:", id, "and data:", eventData);
+      
+      const updatedEvent = await storage.updateEvent(id, eventData);
+      if (!updatedEvent) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      res.status(200).json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Error updating event", error: error.message });
+    }
+  });
+
   app.delete("/api/events/:id", isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
