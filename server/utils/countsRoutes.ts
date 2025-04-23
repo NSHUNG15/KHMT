@@ -9,7 +9,11 @@ export function registerCountsRoutes(app: Express) {
   // Get counts of users (for authenticated users, since it's used in admin dashboard)
   app.get('/api/users/count', async (req, res) => {
     try {
+      console.log('Fetching user count');
       const count = await storage.getCount('users');
+      console.log('User count:', count);
+      
+      // Make sure to respond with an object that has a count property
       res.status(200).json({ count });
     } catch (error) {
       console.error('Error getting user count:', error);

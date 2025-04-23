@@ -19,32 +19,48 @@ const AdminDashboard = () => {
   const [selectedContentTab, setSelectedContentTab] = useState<string | null>(null);
 
   // Fetch summary data
-  const { data: userCount = 0 } = useQuery({
+  const { data: userCountData } = useQuery({
     queryKey: ['/api/users/count'],
     staleTime: 60000,
   });
+  const userCount = userCountData?.count || 0;
 
-  const { data: activeEvents = 0 } = useQuery({
-    queryKey: ['/api/events/count', { status: 'active' }],
+  const { data: activeEventsData } = useQuery({
+    queryKey: ['/api/events/count'],
     staleTime: 60000,
   });
+  const activeEvents = activeEventsData?.count || 0;
 
-  const { data: activeTournaments = 0 } = useQuery({
-    queryKey: ['/api/tournaments/count', { status: 'ongoing' }],
+  const { data: activeTournamentsData } = useQuery({
+    queryKey: ['/api/tournaments/count'],
     staleTime: 60000,
   });
+  const activeTournaments = activeTournamentsData?.count || 0;
 
-  const { data: newAnnouncements = 0 } = useQuery({
-    queryKey: ['/api/announcements/count', { days: 7 }],
+  const { data: newAnnouncementsData } = useQuery({
+    queryKey: ['/api/announcements/count'],
     staleTime: 60000,
   });
+  const newAnnouncements = newAnnouncementsData?.count || 0;
 
   const { data: recentEvents = [] } = useQuery({
     queryKey: ['/api/events', { limit: 5, upcoming: true }],
     staleTime: 60000,
   });
 
-  if (!user || user.role !== "admin") {
+  // Check if user is admin, considering MongoDB document structure
+  let role = '';
+  if (user && typeof user === 'object') {
+    if (user._doc && typeof user._doc === 'object') {
+      role = user._doc.role;
+    } else {
+      role = user.role;
+    }
+  }
+  
+  console.log("Dashboard - Checking user role:", role);
+  
+  if (!user || role !== "admin") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
