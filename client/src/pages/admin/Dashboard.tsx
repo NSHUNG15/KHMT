@@ -13,6 +13,7 @@ import EventManager from "@/components/admin/EventManager";
 import TournamentManager from "@/components/admin/TournamentManagerUpdated";
 import FormManager from "@/components/admin/FormManager";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
+import AnnouncementDebug from "@/components/admin/debug/AnnouncementDebug";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -279,6 +280,11 @@ const AdminDashboard = () => {
           )}
           
           {renderContentSubSection()}
+          
+          <div className="mt-10 border-t pt-6">
+            <h3 className="text-xl font-bold mb-4">Công cụ Debug</h3>
+            <AnnouncementDebug />
+          </div>
         </TabsContent>
 
         <TabsContent value="users">
