@@ -417,16 +417,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const event of events) {
         const eventRegistrations = await storage.listEventRegistrations(event.id);
         for (const registration of eventRegistrations) {
-          // Add event info to each registration
+          // Get user info
+          const user = await storage.getUser(registration.userId);
+          
+          // Add event and user info to each registration
           allRegistrations.push({
             ...registration,
-            event: event
+            event: event,
+            user: user ? {
+              id: user.id,
+              username: user.username,
+              fullName: user.fullName,
+              email: user.email,
+              faculty: user.faculty,
+              studentId: user.studentId,
+              major: user.major
+            } : null
           });
         }
       }
       
       res.status(200).json(allRegistrations);
     } catch (error) {
+      console.error("Error retrieving all registrations:", error);
       res.status(500).json({ message: "Error retrieving registrations" });
     }
   });
