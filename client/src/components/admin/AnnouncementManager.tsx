@@ -175,6 +175,14 @@ const AnnouncementManager = () => {
     e.preventDefault();
     if (!selectedAnnouncement) return;
     
+    console.log('Updating announcement with data:', {
+      id: selectedAnnouncement.id,
+      title,
+      content,
+      category,
+      isPublished,
+    });
+    
     updateAnnouncementMutation.mutate({
       id: selectedAnnouncement.id,
       announcementData: {

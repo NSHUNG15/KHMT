@@ -319,6 +319,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error updating announcement" });
     }
   });
+  
+  // Add PATCH endpoint for partial updates to announcements
+  app.patch("/api/announcements/:id", isAdmin, async (req, res) => {
+    try {
+      console.log("PATCH request received with body:", req.body);
+      const id = parseInt(req.params.id, 10);
+      const announcementData = req.body.announcementData || req.body;
+      
+      // Log the actual data we're using to update
+      console.log("Updating announcement with ID:", id, "and data:", announcementData);
+      
+      const updatedAnnouncement = await storage.updateAnnouncement(id, announcementData);
+      if (!updatedAnnouncement) {
+        return res.status(404).json({ message: "Announcement not found" });
+      }
+      res.status(200).json(updatedAnnouncement);
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Error updating announcement", error: error.message });
+    }
+  });
 
   app.delete("/api/announcements/:id", isAdmin, async (req, res) => {
     try {
