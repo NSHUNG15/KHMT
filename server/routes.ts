@@ -23,6 +23,116 @@ import { generateTournamentBrackets } from "./utils/tournamentBracket";
 
 const MemoryStore = createMemoryStore(session);
 
+// Tournament Export Teams Endpoint
+async function handleExportTeams(req: Request, res: Response) {
+  try {
+    const tournamentId = parseInt(req.params.tournamentId, 10);
+    
+    // Get tournament
+    const tournament = await storage.getTournament(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+    
+    // Get teams
+    const teams = await storage.listTeamsByTournament(tournamentId);
+    
+    // Prepare data for Excel
+    const exportData = [];
+    
+    // For each team, get members
+    for (const team of teams) {
+      const members = await storage.listTeamMembers(team.id);
+      
+      if (members.length === 0) {
+        // Add team with no members
+        exportData.push({
+          teamId: team.id,
+          teamName: team.name,
+          createdAt: team.createdAt,
+          memberId: '',
+          memberName: '',
+          memberEmail: '',
+          memberStudentId: '',
+          memberFaculty: '',
+          memberMajor: '',
+          joinedAt: ''
+        });
+      } else {
+        // Add each member with team info
+        for (const member of members) {
+          const user = await storage.getUser(member.userId);
+          if (!user) continue;
+          
+          const { password, ...safeUser } = user;
+          
+          exportData.push({
+            teamId: team.id,
+            teamName: team.name,
+            createdAt: team.createdAt,
+            memberId: member.id,
+            memberName: safeUser.fullName || safeUser.username,
+            memberEmail: safeUser.email,
+            memberStudentId: safeUser.studentId || '',
+            memberFaculty: safeUser.faculty || '',
+            memberMajor: safeUser.major || '',
+            joinedAt: member.joinedAt
+          });
+        }
+      }
+    }
+    
+    // Generate Excel
+    const filename = `${tournament.name}_teams_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const buffer = await exportToExcel(exportData, filename);
+    
+    // Send file
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(filename)}`);
+    res.send(buffer);
+  } catch (error: any) {
+    console.error("Error exporting teams:", error);
+    res.status(500).json({ message: "Error exporting teams", error: error.message });
+  }
+}
+
+// Export custom forms handler
+async function handleExportForms(req: Request, res: Response) {
+  try {
+    // Get all forms
+    const forms = await storage.listCustomForms();
+    
+    // Prepare data for export 
+    const exportData = forms.map(form => {
+      // Count fields
+      let fieldCount = 0;
+      if (Array.isArray(form.fields)) {
+        fieldCount = form.fields.length;
+      }
+      
+      return {
+        id: form.id,
+        name: form.name,
+        description: form.description || '',
+        fieldCount: fieldCount,
+        createdAt: form.createdAt,
+      };
+    });
+    
+    // Generate Excel
+    const filename = `custom_forms_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const buffer = await exportToExcel(exportData, filename);
+    
+    // Send file
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(filename)}`);
+    res.send(buffer);
+  } catch (error: any) {
+    console.error("Error exporting forms:", error);
+    res.status(500).json({ message: "Error exporting forms", error: error.message });
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session
   app.use(
