@@ -25,13 +25,50 @@ const MemoryStore = createMemoryStore(session);
 
 // Export form handlers are defined below
 
-// Export custom forms handler
+// Export custom forms handler - xuất thông tin người đăng ký biểu mẫu
 async function handleExportForms(req: Request, res: Response) {
   try {
     // Get all forms
     const forms = await storage.listCustomForms();
     
-    // Prepare data for export 
+    // Lấy ID của biểu mẫu từ query parameter, nếu có
+    const formId = req.query.formId ? parseInt(req.query.formId as string, 10) : null;
+    
+    // Nếu có formId cụ thể, sẽ xuất dữ liệu đăng ký của form đó
+    if (formId) {
+      const form = await storage.getCustomForm(formId);
+      if (!form) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+      
+      // TODO: Thay bằng lấy dữ liệu đăng ký của form này
+      // Ví dụ: const submissions = await storage.getFormSubmissions(formId);
+      
+      // Tạm thời tạo dữ liệu mẫu để demo
+      const submissions = [
+        {
+          id: 1,
+          formId: formId,
+          userId: 1,
+          username: "user1",
+          fullName: "Người dùng 1",
+          submittedAt: new Date(),
+          responses: {
+            field_1: "Giá trị 1",
+            field_2: "Giá trị 2"
+          }
+        }
+      ];
+      
+      const filename = `${form.name}_submissions_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const buffer = await exportToExcel(submissions, filename);
+      
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(filename)}`);
+      return res.send(buffer);
+    }
+    
+    // Nếu không có formId, xuất danh sách tất cả các biểu mẫu
     const exportData = forms.map(form => {
       // Count fields
       let fieldCount = 0;
@@ -62,7 +99,7 @@ async function handleExportForms(req: Request, res: Response) {
   }
 }
 
-// Function to handle exporting teams from a tournament
+// Function to handle exporting teams from a tournament - xuất danh sách đội tham gia
 async function handleExportTeams(req: Request, res: Response) {
   try {
     const tournamentId = parseInt(req.params.tournamentId, 10);
@@ -76,7 +113,7 @@ async function handleExportTeams(req: Request, res: Response) {
     // Get teams for this tournament
     const teams = await storage.listTeamsByTournament(tournamentId);
     
-    // Prepare data for export
+    // Prepare data for export - Dữ liệu người dùng đăng ký tham gia giải đấu
     const exportData = await Promise.all(teams.map(async (team) => {
       // Get team members
       const members = await storage.listTeamMembers(team.id);
@@ -91,10 +128,13 @@ async function handleExportTeams(req: Request, res: Response) {
         .map(user => user!.fullName || user!.username)
         .join(", ");
       
+      // Get captain details
+      const captain = await storage.getUser(team.captainId);
+      
       return {
         teamId: team.id,
         name: team.name,
-        captain: team.captainName,
+        captain: captain ? (captain.fullName || captain.username) : "Unknown",
         createdAt: team.createdAt,
         members: memberNames,
         memberCount: members.length,
@@ -696,6 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export event registrations - xuất dữ liệu người dùng đăng ký sự kiện
   app.get("/api/events/:eventId/registrations/export", isAdmin, async (req, res) => {
     try {
       const eventId = parseInt(req.params.eventId, 10);
@@ -713,7 +754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userPromises = registrations.map(reg => storage.getUser(reg.userId));
       const users = await Promise.all(userPromises);
       
-      // Combine registration data with user data
+      // Combine registration data with user data - Dữ liệu người dùng đăng ký sự kiện
       const registrationData = registrations.map((reg, index) => {
         const user = users[index];
         if (!user) return null;
@@ -721,12 +762,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Remove password and other sensitive information
         const { password, ...userDetails } = user;
         
+        // Xử lý dữ liệu form, lấy thông tin người dùng đã điền
+        let formResponses = {};
+        if (reg.formData && typeof reg.formData === 'object') {
+          formResponses = reg.formData;
+        } else if (typeof reg.formData === 'string') {
+          try {
+            formResponses = JSON.parse(reg.formData);
+          } catch (e) {
+            console.error("Error parsing formData:", e);
+          }
+        }
+        
         return {
           registrationId: reg.id,
           registrationStatus: reg.status,
           registeredAt: reg.registeredAt,
-          ...userDetails,
-          ...reg.formData,
+          username: userDetails.username,
+          fullName: userDetails.fullName,
+          email: userDetails.email,
+          faculty: userDetails.faculty,
+          studentId: userDetails.studentId,
+          ...formResponses,
         };
       }).filter(data => data !== null);
       
@@ -736,7 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send file
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+      res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(filename)}`);
       res.send(buffer);
     } catch (error) {
       console.error("Export error:", error);
