@@ -159,6 +159,7 @@ const AnnouncementManager = () => {
     createAnnouncementMutation.mutate({
       title,
       content,
+      category,
       isPublished,
       createdBy: user.id,
     });
@@ -173,6 +174,7 @@ const AnnouncementManager = () => {
       announcementData: {
         title,
         content,
+        category,
         isPublished,
       },
     });
@@ -214,6 +216,7 @@ const AnnouncementManager = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Tiêu đề</TableHead>
+                  <TableHead>Danh mục</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead className="text-center">Trạng thái</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
@@ -223,7 +226,17 @@ const AnnouncementManager = () => {
                 {announcements.map((announcement) => (
                   <TableRow key={announcement.id}>
                     <TableCell className="font-medium">
-                      <div className="truncate max-w-[300px]">{announcement.title}</div>
+                      <div className="truncate max-w-[250px]">{announcement.title}</div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                        {announcement.category === "general" && "Thông tin chung"}
+                        {announcement.category === "academic" && "Học thuật"}
+                        {announcement.category === "events" && "Sự kiện"}
+                        {announcement.category === "competition" && "Cuộc thi"}
+                        {announcement.category === "news" && "Tin tức"}
+                        {!announcement.category && "Thông tin chung"}
+                      </span>
                     </TableCell>
                     <TableCell>{format(new Date(announcement.createdAt), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-center">
@@ -302,6 +315,22 @@ const AnnouncementManager = () => {
                 />
               </div>
               
+              <div className="grid gap-2">
+                <Label htmlFor="category">Danh mục</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn danh mục" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Thông tin chung</SelectItem>
+                    <SelectItem value="academic">Học thuật</SelectItem>
+                    <SelectItem value="events">Sự kiện</SelectItem>
+                    <SelectItem value="competition">Cuộc thi</SelectItem>
+                    <SelectItem value="news">Tin tức</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="flex items-center space-x-2">
                 <Switch 
                   id="isPublished" 
@@ -363,6 +392,22 @@ const AnnouncementManager = () => {
                 />
               </div>
               
+              <div className="grid gap-2">
+                <Label htmlFor="category">Danh mục</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn danh mục" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Thông tin chung</SelectItem>
+                    <SelectItem value="academic">Học thuật</SelectItem>
+                    <SelectItem value="events">Sự kiện</SelectItem>
+                    <SelectItem value="competition">Cuộc thi</SelectItem>
+                    <SelectItem value="news">Tin tức</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="flex items-center space-x-2">
                 <Switch 
                   id="isPublished" 
@@ -400,9 +445,30 @@ const AnnouncementManager = () => {
             <div className="mt-4 space-y-4">
               <div>
                 <h3 className="text-xl font-bold">{selectedAnnouncement.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Ngày tạo: {format(new Date(selectedAnnouncement.createdAt), "dd/MM/yyyy HH:mm")}
-                </p>
+                <div className="flex flex-col gap-1 mt-1">
+                  <p className="text-sm text-muted-foreground">
+                    Ngày tạo: {format(new Date(selectedAnnouncement.createdAt), "dd/MM/yyyy HH:mm")}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Danh mục: </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {selectedAnnouncement.category === "general" && "Thông tin chung"}
+                      {selectedAnnouncement.category === "academic" && "Học thuật"}
+                      {selectedAnnouncement.category === "events" && "Sự kiện"}
+                      {selectedAnnouncement.category === "competition" && "Cuộc thi"}
+                      {selectedAnnouncement.category === "news" && "Tin tức"}
+                      {!selectedAnnouncement.category && "Thông tin chung"}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Trạng thái: </span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      selectedAnnouncement.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {selectedAnnouncement.isPublished ? 'Đã đăng' : 'Bản nháp'}
+                    </span>
+                  </p>
+                </div>
               </div>
               
               <div className="border-t pt-4">
