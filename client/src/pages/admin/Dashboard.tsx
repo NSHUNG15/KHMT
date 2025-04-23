@@ -178,7 +178,7 @@ const AdminDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{userCount}</div>
+                <div className="text-3xl font-bold">{userCount || 0}</div>
                 <Users className="w-4 h-4 text-muted-foreground mt-1" />
               </CardContent>
             </Card>
@@ -190,7 +190,7 @@ const AdminDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{activeEvents}</div>
+                <div className="text-3xl font-bold">{activeEvents || 0}</div>
                 <Calendar className="w-4 h-4 text-muted-foreground mt-1" />
               </CardContent>
             </Card>
@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {recentEvents && recentEvents.length > 0 ? (
+                {recentEvents && Array.isArray(recentEvents) && recentEvents.length > 0 ? (
                   <div className="space-y-4">
                     {recentEvents.map((event: any) => (
                       <div key={event.id} className="flex justify-between items-center py-2 border-b">
