@@ -266,6 +266,7 @@ const TournamentManager = () => {
     setMaxTeams(tournament.maxTeams || 0);
     setIsPublished(tournament.isPublished);
     setStatus(tournament.status);
+    setSelectedFormId(tournament.formId);
     setIsEditDialogOpen(true);
   };
 
@@ -322,25 +323,54 @@ const TournamentManager = () => {
     }
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTournament) return;
     
-    updateTournamentMutation.mutate({
-      id: selectedTournament.id,
-      tournamentData: {
-        name,
-        description,
-        startDate,
-        endDate,
-        registrationDeadline,
-        sportType,
-        format,
-        maxTeams: maxTeams || null,
-        isPublished,
-        status,
-      },
-    });
+    try {
+      // Nếu có formFields mới và không chọn form có sẵn, tạo form mới
+      let formId = selectedFormId;
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      if (!formId && formFields.length > 0) {
+        // Tạo form mới
+        const formRes = await apiRequest('POST', '/api/forms', {
+          name: `Form đăng ký giải đấu ${name}`,
+          fields: formFields,
+          createdBy: user.id
+        });
+        const newForm = await formRes.json();
+        formId = newForm.id;
+        
+        toast({
+          title: "Tạo biểu mẫu thành công",
+          description: "Biểu mẫu đăng ký đã được tạo"
+        });
+      }
+      
+      updateTournamentMutation.mutate({
+        id: selectedTournament.id,
+        tournamentData: {
+          name,
+          description,
+          startDate,
+          endDate,
+          registrationDeadline,
+          sportType,
+          format,
+          maxTeams: maxTeams || null,
+          isPublished,
+          status,
+          formId: formId || null
+        },
+      });
+    } catch (error: any) {
+      toast({
+        title: "Lỗi khi cập nhật giải đấu",
+        description: error.message || "Đã xảy ra lỗi, vui lòng thử lại sau",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteConfirm = () => {
@@ -573,7 +603,7 @@ const TournamentManager = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !startDate && "text-muted-foreground"
                           )}
                         >
@@ -599,7 +629,7 @@ const TournamentManager = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !endDate && "text-muted-foreground"
                           )}
                         >
@@ -612,6 +642,9 @@ const TournamentManager = () => {
                           mode="single"
                           selected={endDate}
                           onSelect={setEndDate}
+                          disabled={(date) => 
+                            startDate ? date < startDate : false
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -625,7 +658,7 @@ const TournamentManager = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !registrationDeadline && "text-muted-foreground"
                           )}
                         >
@@ -638,6 +671,9 @@ const TournamentManager = () => {
                           mode="single"
                           selected={registrationDeadline}
                           onSelect={setRegistrationDeadline}
+                          disabled={(date) => 
+                            startDate ? date > startDate : false
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -696,6 +732,15 @@ const TournamentManager = () => {
                     </Select>
                   </div>
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="form" className="space-y-4">
+                <TournamentFormTab
+                  selectedFormId={selectedFormId}
+                  setSelectedFormId={setSelectedFormId}
+                  formFields={formFields}
+                  setFormFields={setFormFields}
+                />
               </TabsContent>
             </Tabs>
             
@@ -781,7 +826,7 @@ const TournamentManager = () => {
                       checked={isPublished} 
                       onCheckedChange={setIsPublished} 
                     />
-                    <Label htmlFor="isPublished">Công bố giải đấu</Label>
+                    <Label htmlFor="isPublished">Công bố</Label>
                   </div>
                 </div>
               </TabsContent>
@@ -795,7 +840,7 @@ const TournamentManager = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !startDate && "text-muted-foreground"
                           )}
                         >
@@ -821,7 +866,7 @@ const TournamentManager = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !endDate && "text-muted-foreground"
                           )}
                         >
@@ -834,6 +879,9 @@ const TournamentManager = () => {
                           mode="single"
                           selected={endDate}
                           onSelect={setEndDate}
+                          disabled={(date) => 
+                            startDate ? date < startDate : false
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -847,7 +895,7 @@ const TournamentManager = () => {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !registrationDeadline && "text-muted-foreground"
                           )}
                         >
@@ -860,6 +908,9 @@ const TournamentManager = () => {
                           mode="single"
                           selected={registrationDeadline}
                           onSelect={setRegistrationDeadline}
+                          disabled={(date) => 
+                            startDate ? date > startDate : false
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -919,6 +970,15 @@ const TournamentManager = () => {
                   </div>
                 </div>
               </TabsContent>
+              
+              <TabsContent value="form" className="space-y-4">
+                <TournamentFormTab
+                  selectedFormId={selectedFormId}
+                  setSelectedFormId={setSelectedFormId}
+                  formFields={formFields}
+                  setFormFields={setFormFields}
+                />
+              </TabsContent>
             </Tabs>
             
             <DialogFooter className="mt-6">
@@ -930,7 +990,7 @@ const TournamentManager = () => {
                 Hủy
               </Button>
               <Button type="submit" disabled={updateTournamentMutation.isPending}>
-                {updateTournamentMutation.isPending ? "Đang cập nhật..." : "Lưu thay đổi"}
+                {updateTournamentMutation.isPending ? "Đang xử lý..." : "Cập nhật"}
               </Button>
             </DialogFooter>
           </form>
@@ -941,11 +1001,19 @@ const TournamentManager = () => {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <DialogTitle>Xác nhận xóa giải đấu</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn xóa giải đấu "{selectedTournament?.name}"? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa giải đấu này? Thao tác này không thể hoàn tác.
             </DialogDescription>
           </DialogHeader>
+          <div className="pt-4 pb-2">
+            {selectedTournament && (
+              <div className="border rounded-md p-4 mb-4">
+                <p className="font-medium">{selectedTournament.name}</p>
+                <p className="text-sm text-muted-foreground mt-1">{selectedTournament.description}</p>
+              </div>
+            )}
+          </div>
           <DialogFooter>
             <Button 
               type="button" 
@@ -960,289 +1028,31 @@ const TournamentManager = () => {
               onClick={handleDeleteConfirm}
               disabled={deleteTournamentMutation.isPending}
             >
-              {deleteTournamentMutation.isPending ? "Đang xóa..." : "Xóa giải đấu"}
+              {deleteTournamentMutation.isPending ? "Đang xử lý..." : "Xác nhận xóa"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Teams View Dialog */}
-      <Dialog open={isTeamsViewOpen} onOpenChange={setIsTeamsViewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Quản lý Đội - {selectedTournament?.name}</DialogTitle>
-            <DialogDescription>
-              Danh sách các đội tham gia giải đấu
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            <div className="flex justify-between mb-4">
-              <Button
-                onClick={handleExportTeams}
-                disabled={exportTeamsMutation.isPending}
-                variant="outline"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {exportTeamsMutation.isPending ? "Đang xuất..." : "Xuất Excel"}
-              </Button>
-              
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Thêm đội mới
-              </Button>
-            </div>
-            
-            {teamsLoading ? (
-              <div className="text-center py-4">Đang tải...</div>
-            ) : teams.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Chưa có đội nào đăng ký giải đấu này.
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tên đội</TableHead>
-                    <TableHead>Đội trưởng</TableHead>
-                    <TableHead>Số thành viên</TableHead>
-                    <TableHead className="text-center">Trạng thái</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teams.map((team: any) => (
-                    <TableRow key={team.id}>
-                      <TableCell className="font-medium">{team.name}</TableCell>
-                      <TableCell>{team.captain?.fullName || 'Không có'}</TableCell>
-                      <TableCell>{team.memberCount || '0'}</TableCell>
-                      <TableCell className="text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          team.status === 'accepted' ? 'bg-green-100 text-green-800' : 
-                          team.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {team.status === 'accepted' ? 'Đã chấp nhận' : 
-                           team.status === 'pending' ? 'Đang chờ' : 'Từ chối'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-          
-          <DialogFooter className="mt-6">
-            <Button 
-              type="button" 
-              onClick={() => setIsTeamsViewOpen(false)}
-            >
-              Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Matches View Dialog */}
-      <Dialog open={isMatchesViewOpen} onOpenChange={setIsMatchesViewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Lịch Thi Đấu - {selectedTournament?.name}</DialogTitle>
-            <DialogDescription>
-              Quản lý lịch thi đấu và kết quả
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            <div className="flex justify-between mb-4">
-              <Button
-                onClick={() => openBracketGenDialog(selectedTournament!)}
-                variant="outline"
-              >
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                Tạo lịch thi đấu
-              </Button>
-              
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Thêm trận đấu
-              </Button>
-            </div>
-            
-            {matchesLoading ? (
-              <div className="text-center py-4">Đang tải...</div>
-            ) : matches.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Chưa có lịch thi đấu nào được tạo.
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Vòng</TableHead>
-                    <TableHead>Đội 1</TableHead>
-                    <TableHead>Đội 2</TableHead>
-                    <TableHead>Tỉ số</TableHead>
-                    <TableHead>Địa điểm</TableHead>
-                    <TableHead className="text-center">Trạng thái</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {matches.map((match: any) => (
-                    <TableRow key={match.id}>
-                      <TableCell>
-                        {match.format === 'roundrobin' 
-                          ? `Vòng tròn ${match.round}` 
-                          : match.format === 'groups' 
-                            ? `Bảng ${match.groupName} - Trận ${match.matchNumber}` 
-                            : `Vòng ${match.round}`}
-                      </TableCell>
-                      <TableCell>{match.team1?.name || 'TBD'}</TableCell>
-                      <TableCell>{match.team2?.name || 'TBD'}</TableCell>
-                      <TableCell>
-                        {match.team1Score !== null && match.team2Score !== null
-                          ? `${match.team1Score} - ${match.team2Score}`
-                          : 'Chưa có'
-                        }
-                      </TableCell>
-                      <TableCell>{match.location || 'Chưa ấn định'}</TableCell>
-                      <TableCell className="text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          match.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                          match.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {match.status === 'completed' ? 'Đã hoàn thành' : 
-                           match.status === 'scheduled' ? 'Đã lên lịch' : 'Chưa bắt đầu'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-          
-          <DialogFooter className="mt-6">
-            <Button 
-              type="button" 
-              onClick={() => setIsMatchesViewOpen(false)}
-            >
-              Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Standings View Dialog */}
-      <Dialog open={isStandingsViewOpen} onOpenChange={setIsStandingsViewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Bảng Xếp Hạng - {selectedTournament?.name}</DialogTitle>
-            <DialogDescription>
-              Bảng xếp hạng và thành tích
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            {standingsLoading ? (
-              <div className="text-center py-4">Đang tải...</div>
-            ) : standings.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Chưa có dữ liệu bảng xếp hạng.
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Thứ hạng</TableHead>
-                    <TableHead>Đội</TableHead>
-                    <TableHead className="text-center">Trận</TableHead>
-                    <TableHead className="text-center">Thắng</TableHead>
-                    <TableHead className="text-center">Hòa</TableHead>
-                    <TableHead className="text-center">Thua</TableHead>
-                    <TableHead className="text-center">Hiệu số</TableHead>
-                    <TableHead className="text-center">Điểm</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {standings.map((standing: any) => (
-                    <TableRow key={standing.id}>
-                      <TableCell>{standing.rank || '-'}</TableCell>
-                      <TableCell className="font-medium">{standing.team?.name || 'Unknown'}</TableCell>
-                      <TableCell className="text-center">{standing.wins + standing.draws + standing.losses}</TableCell>
-                      <TableCell className="text-center">{standing.wins}</TableCell>
-                      <TableCell className="text-center">{standing.draws}</TableCell>
-                      <TableCell className="text-center">{standing.losses}</TableCell>
-                      <TableCell className="text-center">
-                        {standing.goalsFor !== null && standing.goalsAgainst !== null 
-                          ? standing.goalsFor - standing.goalsAgainst 
-                          : 0}
-                      </TableCell>
-                      <TableCell className="text-center font-bold">{standing.points}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-          
-          <DialogFooter className="mt-6">
-            <Button 
-              type="button" 
-              onClick={() => setIsStandingsViewOpen(false)}
-            >
-              Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
       {/* Generate Brackets Dialog */}
       <Dialog open={isBracketGenDialogOpen} onOpenChange={setIsBracketGenDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tạo lịch thi đấu tự động</DialogTitle>
+            <DialogTitle>Tạo lịch thi đấu</DialogTitle>
             <DialogDescription>
-              Tạo lịch thi đấu tự động dựa trên định dạng giải đấu và các đội đã đăng ký
+              Bạn có chắc chắn muốn tạo lịch thi đấu cho giải đấu này? Lưu ý rằng bất kỳ lịch thi đấu hiện có nào sẽ bị xóa.
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="py-4">
-            <div className="space-y-4">
-              <p>
-                Định dạng giải đấu: <strong>
-                  {tournamentFormats.find(f => f.value === selectedTournament?.format)?.label || selectedTournament?.format}
-                </strong>
-              </p>
-              
-              <p>
-                Số đội đăng ký: <strong>{teams.length || 0}</strong>
-              </p>
-              
-              <div className="mt-4 p-4 bg-amber-50 text-amber-800 rounded-md">
-                <p className="font-medium">Lưu ý:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Thao tác này sẽ xóa tất cả các trận đấu hiện có và tạo lịch mới</li>
-                  <li>Đảm bảo tất cả các đội đã được chấp nhận trước khi tạo lịch</li>
-                  <li>Đối với định dạng loại trực tiếp, số đội nên là lũy thừa của 2 (ví dụ: 8, 16, 32)</li>
-                </ul>
+          <div className="pt-4 pb-2">
+            {selectedTournament && (
+              <div className="border rounded-md p-4 mb-4">
+                <p className="font-medium">{selectedTournament.name}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {tournamentFormats.find(f => f.value === selectedTournament.format)?.label || selectedTournament.format}
+                </p>
               </div>
-            </div>
+            )}
           </div>
-          
           <DialogFooter>
             <Button 
               type="button" 
@@ -1257,6 +1067,234 @@ const TournamentManager = () => {
               disabled={generateBracketsMutation.isPending}
             >
               {generateBracketsMutation.isPending ? "Đang xử lý..." : "Tạo lịch thi đấu"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Teams View Dialog */}
+      <Dialog open={isTeamsViewOpen} onOpenChange={setIsTeamsViewOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Quản lý đội thi đấu</DialogTitle>
+            <DialogDescription>
+              {selectedTournament?.name} - Danh sách đội tham gia
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {teamsLoading ? (
+              <div className="text-center py-8">Đang tải dữ liệu...</div>
+            ) : Array.isArray(teams) && teams.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Chưa có đội nào đăng ký tham gia.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên đội</TableHead>
+                      <TableHead>Đội trưởng</TableHead>
+                      <TableHead>Số thành viên</TableHead>
+                      <TableHead>Ngày đăng ký</TableHead>
+                      <TableHead className="text-right">Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.isArray(teams) && teams.map((team: any) => (
+                      <TableRow key={team.id}>
+                        <TableCell className="font-medium">{team.name}</TableCell>
+                        <TableCell>{team.captainName}</TableCell>
+                        <TableCell>{team.memberCount || '-'}</TableCell>
+                        <TableCell>{formatDate(new Date(team.createdAt), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="outline" size="sm">
+                            <FileText className="h-4 w-4 mr-2" />
+                            Chi tiết
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsTeamsViewOpen(false)}
+            >
+              Đóng
+            </Button>
+            <Button 
+              type="button" 
+              onClick={handleExportTeams}
+              disabled={exportTeamsMutation.isPending}
+            >
+              {exportTeamsMutation.isPending 
+                ? "Đang xuất..." 
+                : <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Xuất Excel
+                  </>
+              }
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Matches View Dialog */}
+      <Dialog open={isMatchesViewOpen} onOpenChange={setIsMatchesViewOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Lịch thi đấu</DialogTitle>
+            <DialogDescription>
+              {selectedTournament?.name} - Lịch thi đấu
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {matchesLoading ? (
+              <div className="text-center py-8">Đang tải dữ liệu...</div>
+            ) : Array.isArray(matches) && matches.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Chưa có lịch thi đấu nào được tạo.
+                <div className="mt-4">
+                  <Button onClick={() => {
+                    setIsMatchesViewOpen(false);
+                    setIsBracketGenDialogOpen(true);
+                  }}>
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    Tạo lịch thi đấu
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Vòng đấu</TableHead>
+                      <TableHead>Đội 1</TableHead>
+                      <TableHead>Tỉ số</TableHead>
+                      <TableHead>Đội 2</TableHead>
+                      <TableHead>Ngày thi đấu</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead className="text-right">Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.isArray(matches) && matches.map((match: any) => (
+                      <TableRow key={match.id}>
+                        <TableCell>{match.round}</TableCell>
+                        <TableCell>{match.team1Name}</TableCell>
+                        <TableCell>
+                          {match.status === 'completed' 
+                            ? `${match.team1Score} - ${match.team2Score}`
+                            : '-'
+                          }
+                        </TableCell>
+                        <TableCell>{match.team2Name}</TableCell>
+                        <TableCell>
+                          {match.matchDate ? formatDate(new Date(match.matchDate), "dd/MM/yyyy") : 'TBD'}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            match.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                            match.status === 'ongoing' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {match.status === 'completed' ? 'Đã kết thúc' : 
+                            match.status === 'ongoing' ? 'Đang diễn ra' : 
+                            'Chưa bắt đầu'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="outline" size="sm">
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Cập nhật
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsMatchesViewOpen(false)}
+            >
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Standings View Dialog */}
+      <Dialog open={isStandingsViewOpen} onOpenChange={setIsStandingsViewOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Bảng xếp hạng</DialogTitle>
+            <DialogDescription>
+              {selectedTournament?.name} - Bảng xếp hạng
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {standingsLoading ? (
+              <div className="text-center py-8">Đang tải dữ liệu...</div>
+            ) : Array.isArray(standings) && standings.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Chưa có bảng xếp hạng nào được tạo.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Hạng</TableHead>
+                      <TableHead>Đội</TableHead>
+                      <TableHead>Điểm</TableHead>
+                      <TableHead>Thắng</TableHead>
+                      <TableHead>Hòa</TableHead>
+                      <TableHead>Thua</TableHead>
+                      <TableHead>Hiệu số</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.isArray(standings) && standings.map((standing: any, index: number) => (
+                      <TableRow key={standing.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="font-medium">{standing.teamName}</TableCell>
+                        <TableCell>{standing.points}</TableCell>
+                        <TableCell>{standing.wins}</TableCell>
+                        <TableCell>{standing.draws}</TableCell>
+                        <TableCell>{standing.losses}</TableCell>
+                        <TableCell>{standing.goalsFor - standing.goalsAgainst}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsStandingsViewOpen(false)}
+            >
+              Đóng
             </Button>
           </DialogFooter>
         </DialogContent>
