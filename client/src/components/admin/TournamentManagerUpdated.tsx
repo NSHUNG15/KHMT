@@ -312,7 +312,7 @@ const TournamentManager = () => {
         isPublished,
         status,
         createdBy: user.id,
-        formId: formId || null
+        formId: formId ? formId : undefined
       });
     } catch (error: any) {
       toast({
@@ -361,7 +361,7 @@ const TournamentManager = () => {
           maxTeams: maxTeams || null,
           isPublished,
           status,
-          formId: formId || null
+          formId: formId ? formId : undefined
         },
       });
     } catch (error: any) {

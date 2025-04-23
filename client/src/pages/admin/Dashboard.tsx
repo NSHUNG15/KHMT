@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 
 // Import Admin Components
 import EventManager from "@/components/admin/EventManager";
-import TournamentManager from "@/components/admin/TournamentManagerPatched";
+import TournamentManager from "@/components/admin/TournamentManagerUpdated";
 import FormManager from "@/components/admin/FormManager";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
 

@@ -109,6 +109,7 @@ export const tournaments = pgTable("tournaments", {
   status: text("status").default("upcoming").notNull(), // upcoming, ongoing, completed
   maxTeams: integer("max_teams"),
   imageUrl: text("image_url"),
+  formId: integer("form_id"), // Reference to custom form for team registration
 });
 
 export const insertTournamentSchema = createInsertSchema(tournaments).pick({
@@ -124,6 +125,7 @@ export const insertTournamentSchema = createInsertSchema(tournaments).pick({
   status: true,
   maxTeams: true,
   imageUrl: true,
+  formId: true,
 });
 
 // Teams Table
