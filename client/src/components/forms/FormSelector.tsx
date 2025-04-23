@@ -47,7 +47,7 @@ const FormSelector: React.FC<FormSelectorProps> = ({
 
   // Load danh sách các biểu mẫu
   const { data: forms = [], isLoading, error } = useQuery<Form[]>({
-    queryKey: ['/api/forms'],
+    queryKey: ['/api/custom-forms'],
     staleTime: 10000,
   });
 
