@@ -218,6 +218,14 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
     );
   };
 
+  // Cập nhật giá trị khi initialFields thay đổi
+  React.useEffect(() => {
+    if (initialFields) {
+      console.log("FormBuilder initialFields changed:", initialFields);
+      setFields(initialFields);
+    }
+  }, [initialFields]);
+
   // Render một field để xem trước
   const renderPreviewField = (field: FormField) => {
     switch(field.type) {

@@ -471,7 +471,13 @@ const EventManager = () => {
           </DialogHeader>
           
           <form onSubmit={handleCreateSubmit}>
-            <Tabs defaultValue="basic" className="mt-4">
+            <Tabs defaultValue="basic" className="mt-4" onValueChange={(value) => {
+                if (value === "form") {
+                  // Đảm bảo formFields được khởi tạo đúng khi chuyển tab
+                  console.log("Switching to form tab in create dialog, ensuring formFields is initialized");
+                  setFormFields(formFields || []);
+                }
+              }}>
               <TabsList className="mb-4">
                 <TabsTrigger value="basic">Thông tin cơ bản</TabsTrigger>
                 <TabsTrigger value="dates">Thời gian</TabsTrigger>
@@ -664,7 +670,13 @@ const EventManager = () => {
           </DialogHeader>
           
           <form onSubmit={handleEditSubmit}>
-            <Tabs defaultValue="basic" className="mt-4">
+            <Tabs defaultValue="basic" className="mt-4" onValueChange={(value) => {
+                if (value === "form") {
+                  // Đảm bảo formFields được khởi tạo đúng khi chuyển tab
+                  console.log("Switching to form tab in edit dialog, ensuring formFields is initialized");
+                  setFormFields(formFields || []);
+                }
+              }}>
               <TabsList className="mb-4">
                 <TabsTrigger value="basic">Thông tin cơ bản</TabsTrigger>
                 <TabsTrigger value="dates">Thời gian</TabsTrigger>
