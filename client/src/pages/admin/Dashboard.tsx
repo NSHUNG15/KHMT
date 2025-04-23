@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Users, Calendar, Trophy, Bell, FileText, Download } from "lucide-react";
 import { Link } from "wouter";
-import { DataTable } from "@/components/admin/DataTable";
+import DataTable from "@/components/admin/DataTable";
 import {
   Dialog,
   DialogContent,
