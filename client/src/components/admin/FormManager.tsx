@@ -256,10 +256,11 @@ const FormManager = () => {
       return;
     }
     
+    console.log("Attempting to create form with fields:", fields);
     createFormMutation.mutate({
       name,
       description,
-      structure: JSON.stringify({ fields }),
+      fields: fields, // Send fields directly
     });
   };
 
@@ -278,12 +279,13 @@ const FormManager = () => {
       return;
     }
     
+    console.log("Attempting to update form with fields:", fields);
     updateFormMutation.mutate({
       id: selectedForm.id,
       formData: {
         name,
         description,
-        structure: JSON.stringify({ fields }),
+        fields: fields, // Send fields directly
       },
     });
   };

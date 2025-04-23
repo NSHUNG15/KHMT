@@ -1265,9 +1265,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating custom form with request body:", req.body);
       const userId = req.session.userId!;
       
+      // Ensure we can handle both direct fields and structure.fields
+      let fields = [];
+      if (req.body.fields) {
+        fields = req.body.fields;
+        console.log("Using fields directly:", fields);
+      } else if (req.body.structure) {
+        try {
+          const structure = typeof req.body.structure === 'string' 
+            ? JSON.parse(req.body.structure) 
+            : req.body.structure;
+          fields = structure.fields || [];
+          console.log("Extracted fields from structure:", fields);
+        } catch (e) {
+          console.error("Error parsing structure:", e);
+        }
+      }
+      
       const formData = {
         name: req.body.name || "Untitled Form",
-        fields: req.body.fields || [], // Assuming fields is in req.body.fields
+        description: req.body.description || "",
+        fields: fields,
         createdBy: userId
       };
       
@@ -1292,13 +1310,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/custom-forms/:id", isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
-      const formData = req.body;
+      
+      // Ensure we can handle both direct fields and structure.fields
+      let fields = [];
+      if (req.body.fields) {
+        fields = req.body.fields;
+        console.log("Using fields directly:", fields);
+      } else if (req.body.structure) {
+        try {
+          const structure = typeof req.body.structure === 'string' 
+            ? JSON.parse(req.body.structure) 
+            : req.body.structure;
+          fields = structure.fields || [];
+          console.log("Extracted fields from structure:", fields);
+        } catch (e) {
+          console.error("Error parsing structure:", e);
+        }
+      }
+      
+      const formData = {
+        name: req.body.name,
+        description: req.body.description,
+        fields: fields
+      };
+      
+      console.log("Updating form with data:", formData);
+      
       const updatedForm = await storage.updateCustomForm(id, formData);
       if (!updatedForm) {
         return res.status(404).json({ message: "Custom form not found" });
       }
       res.status(200).json(updatedForm);
     } catch (error) {
+      console.error("Error updating custom form:", error);
       if (error instanceof ZodError) {
         return res.status(400).json({ 
           message: "Validation error", 

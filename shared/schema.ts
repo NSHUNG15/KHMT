@@ -217,6 +217,7 @@ export const insertStandingSchema = createInsertSchema(standings).pick({
 export const customForms = pgTable("custom_forms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  description: text("description"),
   fields: jsonb("fields").notNull(), // JSON schema for form fields
   createdBy: integer("created_by").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -224,6 +225,7 @@ export const customForms = pgTable("custom_forms", {
 
 export const insertCustomFormSchema = createInsertSchema(customForms).pick({
   name: true,
+  description: true,
   fields: true,
   createdBy: true,
 });
