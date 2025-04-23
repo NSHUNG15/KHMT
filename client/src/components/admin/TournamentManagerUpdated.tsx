@@ -285,7 +285,7 @@ const TournamentManager = () => {
       
       if (!formId && formFields.length > 0) {
         // Tạo form mới
-        const formRes = await apiRequest('POST', '/api/forms', {
+        const formRes = await apiRequest('POST', '/api/custom-forms', {
           name: `Form đăng ký giải đấu ${name}`,
           fields: formFields,
           createdBy: user.id
@@ -334,7 +334,7 @@ const TournamentManager = () => {
       
       if (!formId && formFields.length > 0) {
         // Tạo form mới
-        const formRes = await apiRequest('POST', '/api/forms', {
+        const formRes = await apiRequest('POST', '/api/custom-forms', {
           name: `Form đăng ký giải đấu ${name}`,
           fields: formFields,
           createdBy: user.id
