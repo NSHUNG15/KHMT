@@ -61,6 +61,15 @@ const EventManager = () => {
   const [isPublished, setIsPublished] = useState(false);
   const [formFields, setFormFields] = useState<any[]>([]);
   
+  // Đảm bảo formFields luôn được khởi tạo khi dialog mở
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      console.log("Initializing form fields for create dialog");
+      // Đảm bảo formFields là một mảng trống khi mở dialog tạo mới
+      setFormFields([]);
+    }
+  }, [isCreateDialogOpen]);
+  
   // Màn hình cập nhật biểu mẫu riêng
   const [isFormUpdateOpen, setIsFormUpdateOpen] = useState(false);
 
