@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
 import { 
   Dialog, 
   DialogContent,
@@ -41,7 +42,6 @@ import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, MoreHorizontal, Plus, Download, Pencil, Trash, UsersRound, Trophy, Table2, FileText } from "lucide-react";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tournament } from "@shared/schema";
@@ -266,7 +266,7 @@ const TournamentManager = () => {
     setMaxTeams(tournament.maxTeams || 0);
     setIsPublished(tournament.isPublished);
     setStatus(tournament.status);
-    setSelectedFormId(tournament.formId);
+    setSelectedFormId(tournament.formId || undefined);
     setIsEditDialogOpen(true);
   };
 
@@ -412,7 +412,10 @@ const TournamentManager = () => {
   };
 
   function formatDate(date: Date, formatStr: string) {
-    return format(date, formatStr);
+    if (date) {
+      return new Date(date).toLocaleDateString('vi-VN');
+    }
+    return '';
   }
 
   return (

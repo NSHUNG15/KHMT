@@ -65,7 +65,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const user = await storage.getUser(req.session.userId);
-    if (!user || user.role !== "admin") {
+    
+    if (!user) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    
+    // Handle MongoDB document structure which may include _doc
+    let role = '';
+    if (user._doc && typeof user._doc === 'object') {
+      role = user._doc.role;
+    } else {
+      role = user.role;
+    }
+    
+    if (role !== "admin") {
       return res.status(403).json({ message: "Admin access required" });
     }
 
