@@ -411,9 +411,10 @@ const TournamentManager = () => {
     setIsBracketGenDialogOpen(true);
   };
 
-  function formatDate(date: Date, formatStr: string) {
-    return format(date, formatStr);
-  }
+  // Chúng ta đã import formatDate từ date-fns ở trên nên không cần định nghĩa lại
+  // function formatDate(date: Date, formatStr: string) { 
+  //   return format(date, formatStr);
+  // }
 
   return (
     <div className="space-y-6">
