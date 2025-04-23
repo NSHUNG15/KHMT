@@ -82,13 +82,6 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
       required: false,
       options: ["Tùy chọn 1", "Tùy chọn 2"],
     };
-    
-    // Thêm trực tiếp trường mới vào danh sách các trường
-    const updatedFields = [...fields, newField];
-    setFields(updatedFields);
-    onChange(updatedFields);
-    
-    // Mở dialog để chỉnh sửa
     setEditingField(newField);
     setIsFieldDialogOpen(true);
   };
@@ -107,7 +100,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
 
       let updatedFields: FormField[];
       
-      // Tìm vị trí field trong mảng
+      // Kiểm tra xem đang thêm mới hay cập nhật
       const existingFieldIndex = fields.findIndex(f => f.id === editingField.id);
       
       if (existingFieldIndex >= 0) {
@@ -116,20 +109,14 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
           index === existingFieldIndex ? editingField : field
         );
       } else {
-        // Thêm field mới - không thực hiện vì đã được thêm trong handleAddField
-        updatedFields = fields;
+        // Thêm field mới
+        updatedFields = [...fields, editingField];
       }
       
       setFields(updatedFields);
       onChange(updatedFields);
       setIsFieldDialogOpen(false);
       setEditingField(null);
-      
-      // Thông báo thành công
-      toast({
-        title: "Thành công",
-        description: existingFieldIndex >= 0 ? "Đã cập nhật trường" : "Đã thêm trường mới",
-      });
     }
   };
 
