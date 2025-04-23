@@ -159,10 +159,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "secret-key",
+      secret: process.env.SESSION_SECRET || "su_duytan_cs_student_union_secret_key",
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: process.env.NODE_ENV === "production", maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
+      cookie: { 
+        secure: process.env.NODE_ENV === "production", 
+        maxAge: parseInt(process.env.SESSION_EXPIRY || "86400000") // 24 hours by default
+      },
       store: new MemoryStore({
         checkPeriod: 86400000, // prune expired entries every 24h
       }),

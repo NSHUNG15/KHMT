@@ -3,6 +3,10 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -43,20 +47,25 @@ app.use((req, res, next) => {
   try {
     const adminUser = await storage.getUserByUsername("admin");
     if (!adminUser) {
-      console.log("Creating default admin user (username: admin, password: admin)");
+      // Get admin credentials from environment variables
+    const adminUsername = process.env.DEFAULT_ADMIN_USERNAME || "admin";
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || "admin";
+    const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || "admin@example.com";
       
-      // Hash the password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash("admin", salt);
+    console.log(`Creating default admin user (username: ${adminUsername}, password: ${adminPassword})`);
       
-      // Create admin user
-      await storage.createUser({
-        username: "admin",
-        password: hashedPassword,
-        email: "admin@example.com",
-        fullName: "Administrator",
-        role: "admin"
-      });
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(adminPassword, salt);
+      
+    // Create admin user
+    await storage.createUser({
+      username: adminUsername,
+      password: hashedPassword,
+      email: adminEmail,
+      fullName: "Administrator",
+      role: "admin"
+    });
       
       console.log("Default admin user created successfully");
     }
@@ -83,10 +92,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
+  // Use port from environment variables or default to 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 5000;
+  const port = parseInt(process.env.PORT || "5000", 10);
   server.listen({
     port,
     host: "0.0.0.0",
