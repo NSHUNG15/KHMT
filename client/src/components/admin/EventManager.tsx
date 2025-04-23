@@ -60,6 +60,9 @@ const EventManager = () => {
   const [capacity, setCapacity] = useState<number>(0);
   const [isPublished, setIsPublished] = useState(false);
   const [formFields, setFormFields] = useState<any[]>([]);
+  
+  // Màn hình cập nhật biểu mẫu riêng
+  const [isFormUpdateOpen, setIsFormUpdateOpen] = useState(false);
 
   // Event query
   const { data: events = [], isLoading } = useQuery<Event[]>({
@@ -347,6 +350,32 @@ const EventManager = () => {
                           <DropdownMenuItem onClick={() => loadEventToEdit(event)}>
                             <Pencil className="h-4 w-4 mr-2" />
                             Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setIsFormUpdateOpen(true);
+                              
+                              // Cố gắng phân tích formTemplate từ event
+                              try {
+                                if (event.formTemplate && typeof event.formTemplate === 'object') {
+                                  const fields = event.formTemplate.fields || [];
+                                  setFormFields(fields);
+                                } else if (typeof event.formTemplate === 'string') {
+                                  const parsedTemplate = JSON.parse(event.formTemplate);
+                                  const fields = parsedTemplate.fields || [];
+                                  setFormFields(fields);
+                                } else {
+                                  setFormFields([]);
+                                }
+                              } catch (e) {
+                                console.error("Lỗi khi phân tích biểu mẫu:", e);
+                                setFormFields([]);
+                              }
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Cập nhật biểu mẫu
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleExportRegistrations()}>
                             <Download className="h-4 w-4 mr-2" />
@@ -853,6 +882,60 @@ const EventManager = () => {
               </div>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Form Update Dialog */}
+      <Dialog open={isFormUpdateOpen} onOpenChange={setIsFormUpdateOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Cập nhật biểu mẫu đăng ký</DialogTitle>
+            <DialogDescription>
+              Cập nhật biểu mẫu đăng ký cho sự kiện
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 space-y-4">
+            <div className="border rounded-md p-4">
+              <h3 className="text-sm font-medium mb-4">Thiết kế biểu mẫu đăng ký</h3>
+              <FormBuilder 
+                onChange={(fields) => {
+                  setFormFields(fields);
+                }}
+                initialFields={formFields}
+              />
+            </div>
+            
+            {formFields.length > 0 && (
+              <div className="flex items-center p-2 bg-muted rounded-md">
+                <p className="text-sm text-muted-foreground">
+                  {formFields.length} trường được thêm vào biểu mẫu
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="outline" onClick={() => setIsFormUpdateOpen(false)}>
+              Hủy
+            </Button>
+            <Button 
+              type="button" 
+              disabled={updateEventMutation.isPending}
+              onClick={() => {
+                if (!selectedEvent) return;
+                
+                updateEventMutation.mutate({
+                  id: selectedEvent.id,
+                  eventData: {
+                    formTemplate: { fields: formFields },
+                  },
+                });
+              }}
+            >
+              {updateEventMutation.isPending ? "Đang xử lý..." : "Cập nhật biểu mẫu"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
