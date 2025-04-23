@@ -19,48 +19,32 @@ const AdminDashboard = () => {
   const [selectedContentTab, setSelectedContentTab] = useState<string | null>(null);
 
   // Fetch summary data
-  const { data: userCountData } = useQuery<{ count: number }>({
+  const { data: userCount = 0 } = useQuery({
     queryKey: ['/api/users/count'],
     staleTime: 60000,
   });
-  const userCount = userCountData?.count || 0;
 
-  const { data: activeEventsData } = useQuery<{ count: number }>({
-    queryKey: ['/api/events/count'],
+  const { data: activeEvents = 0 } = useQuery({
+    queryKey: ['/api/events/count', { status: 'active' }],
     staleTime: 60000,
   });
-  const activeEvents = activeEventsData?.count || 0;
 
-  const { data: activeTournamentsData } = useQuery<{ count: number }>({
-    queryKey: ['/api/tournaments/count'],
+  const { data: activeTournaments = 0 } = useQuery({
+    queryKey: ['/api/tournaments/count', { status: 'ongoing' }],
     staleTime: 60000,
   });
-  const activeTournaments = activeTournamentsData?.count || 0;
 
-  const { data: newAnnouncementsData } = useQuery<{ count: number }>({
-    queryKey: ['/api/announcements/count'],
+  const { data: newAnnouncements = 0 } = useQuery({
+    queryKey: ['/api/announcements/count', { days: 7 }],
     staleTime: 60000,
   });
-  const newAnnouncements = newAnnouncementsData?.count || 0;
 
-  const { data: recentEvents = [] } = useQuery<any[]>({
+  const { data: recentEvents = [] } = useQuery({
     queryKey: ['/api/events', { limit: 5, upcoming: true }],
     staleTime: 60000,
   });
 
-  // Check if user is admin, considering MongoDB document structure
-  let role = '';
-  if (user && typeof user === 'object') {
-    if (user._doc && typeof user._doc === 'object') {
-      role = user._doc.role;
-    } else {
-      role = user.role;
-    }
-  }
-  
-  console.log("Dashboard - Checking user role:", role);
-  
-  if (!user || role !== "admin") {
+  if (!user || user.role !== "admin") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

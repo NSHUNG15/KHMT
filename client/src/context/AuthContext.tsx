@@ -1,10 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 
-// Updated to match MongoDB response structure
 interface User {
-  _id?: string;  // MongoDB id
-  id?: number;   // For backwards compatibility
+  id: number;
   username: string;
   email: string;
   fullName: string;
@@ -12,8 +10,6 @@ interface User {
   faculty?: string;
   studentId?: string;
   major?: string;
-  createdAt?: string;
-  __v?: number;
 }
 
 interface AuthContextType {
@@ -100,9 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
-      // Use _id for MongoDB or fallback to id for backward compatibility
-      const userId = user._id || user.id;
-      const response = await apiRequest('PUT', `/api/users/${userId}`, userData);
+      const response = await apiRequest('PUT', `/api/users/${user.id}`, userData);
       const updatedUser = await response.json();
       setUser(updatedUser);
       return updatedUser;

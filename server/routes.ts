@@ -1,7 +1,6 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-// import { storage } from "./storage";
-import { storage } from "./mongoStorage";
+import { storage } from "./storage";
 import { z } from "zod";
 import { ZodError } from "zod";
 import { 
@@ -15,7 +14,7 @@ import {
   insertMatchSchema, 
   insertStandingSchema, 
   insertCustomFormSchema 
-} from "@shared/mongoSchema";
+} from "@shared/schema";
 import bcrypt from "bcrypt";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -65,29 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const user = await storage.getUser(req.session.userId);
-    
-    if (!user) {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-    
-    // Handle MongoDB document structure which may include _doc
-    let role = '';
-    
-    console.log("User object for admin check:", JSON.stringify(user));
-    
-    if (user._doc && typeof user._doc === 'object') {
-      role = user._doc.role;
-      console.log("Using _doc.role:", role);
-    } else if (user.role) {
-      role = user.role;
-      console.log("Using user.role:", role);
-    } else {
-      console.log("Role not found in user object");
-    }
-    
-    console.log("Final role value:", role);
-    
-    if (role !== "admin") {
+    if (!user || user.role !== "admin") {
       return res.status(403).json({ message: "Admin access required" });
     }
 
@@ -151,15 +128,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Set user session - MongoDB model will have both _id and id
-      req.session.userId = user._id ? user._id.toString() : user.id;
-      req.session.numericId = user.id;
+      // Set user session
+      req.session.userId = user.id;
 
       // Return user without password
       const { password: _, ...userWithoutPassword } = user;
       res.status(200).json(userWithoutPassword);
     } catch (error) {
-      console.error("Login error:", error);
       res.status(500).json({ message: "Error during login" });
     }
   });
@@ -179,18 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Try to get user by MongoDB _id or by numeric id
-      let user;
-      if (req.session.userId && typeof req.session.userId === 'string' && req.session.userId.length === 24) {
-        // Use MongoDB getUserById method if it's a MongoDB ObjectId
-        user = await storage.getUserById(req.session.userId);
-      } else if (req.session.numericId) {
-        // Use numeric ID as fallback
-        user = await storage.getUser(req.session.numericId);
-      } else {
-        return res.status(401).json({ message: "Invalid user session" });
-      }
-
+      const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -199,7 +163,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userWithoutPassword } = user;
       res.status(200).json(userWithoutPassword);
     } catch (error) {
-      console.error("Error getting current user:", error);
       res.status(500).json({ message: "Error retrieving user" });
     }
   });
