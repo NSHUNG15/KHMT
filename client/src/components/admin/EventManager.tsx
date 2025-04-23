@@ -259,14 +259,24 @@ const EventManager = () => {
       // Cố gắng phân tích formTemplate từ event
       console.log("Loading form template:", event.formTemplate);
       if (event.formTemplate && typeof event.formTemplate === 'object') {
-        const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
-        console.log("Parsed form fields (object):", fields);
-        setFormFields(fields);
+        if (event.formTemplate && event.formTemplate.fields) {
+          const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
+          console.log("Parsed form fields (object):", fields);
+          setFormFields(fields);
+        } else {
+          console.log("Form template exists but has no fields");
+          setFormFields([]);
+        }
       } else if (typeof event.formTemplate === 'string') {
-        const parsedTemplate = JSON.parse(event.formTemplate);
-        const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
-        console.log("Parsed form fields (string):", fields);
-        setFormFields(fields);
+        try {
+          const parsedTemplate = JSON.parse(event.formTemplate);
+          const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
+          console.log("Parsed form fields (string):", fields);
+          setFormFields(fields);
+        } catch (parseError) {
+          console.error("Lỗi khi phân tích biểu mẫu (chuỗi):", parseError);
+          setFormFields([]);
+        }
       } else {
         console.log("No form template found, setting empty array");
         setFormFields([]);
@@ -464,14 +474,24 @@ const EventManager = () => {
                               try {
                                 console.log("Loading form template for update dialog:", event.formTemplate);
                                 if (event.formTemplate && typeof event.formTemplate === 'object') {
-                                  const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
-                                  console.log("Parsed form fields for update dialog (object):", fields);
-                                  setFormFields(fields);
+                                  if (event.formTemplate && event.formTemplate.fields) {
+                                    const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
+                                    console.log("Parsed form fields for update dialog (object):", fields);
+                                    setFormFields(fields);
+                                  } else {
+                                    console.log("Form template exists but has no fields");
+                                    setFormFields([]);
+                                  }
                                 } else if (typeof event.formTemplate === 'string') {
-                                  const parsedTemplate = JSON.parse(event.formTemplate);
-                                  const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
-                                  console.log("Parsed form fields for update dialog (string):", fields);
-                                  setFormFields(fields);
+                                  try {
+                                    const parsedTemplate = JSON.parse(event.formTemplate);
+                                    const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
+                                    console.log("Parsed form fields for update dialog (string):", fields);
+                                    setFormFields(fields);
+                                  } catch (parseError) {
+                                    console.error("Lỗi khi phân tích biểu mẫu (chuỗi):", parseError);
+                                    setFormFields([]);
+                                  }
                                 } else {
                                   console.log("No form template found for update dialog, setting empty array");
                                   setFormFields([]);
