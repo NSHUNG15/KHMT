@@ -42,9 +42,15 @@ function ProtectedRoute({ component: Component, adminOnly = false }: { component
     return <div className="min-h-screen flex items-center justify-center">Redirecting to login...</div>;
   }
   
-  if (adminOnly && user.role !== "admin") {
-    console.log("User not admin, access denied");
-    return <NotFound />;
+  if (adminOnly) {
+    // Check if user role is admin, considering MongoDB document structure
+    const role = user._doc?.role || user.role;
+    console.log("Checking admin access, user role:", role);
+    
+    if (role !== "admin") {
+      console.log("User not admin, access denied");
+      return <NotFound />;
+    }
   }
   
   console.log("Rendering protected component");
