@@ -97,7 +97,7 @@ const FormManager = () => {
 
   // Forms query
   const { data: forms = [], isLoading } = useQuery<CustomForm[]>({
-    queryKey: ['/api/forms'],
+    queryKey: ['/api/custom-forms'],
     staleTime: 10000,
   });
 
