@@ -1093,6 +1093,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add export endpoint for tournament teams
+  app.get("/api/tournaments/:tournamentId/export-teams", isAdmin, handleExportTeams);
+  
   // Matches routes
   app.get("/api/tournaments/:tournamentId/matches", async (req, res) => {
     try {

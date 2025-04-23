@@ -498,6 +498,17 @@ const FormManager = () => {
                             <Copy className="h-4 w-4 mr-2" />
                             Tạo bản sao
                           </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a 
+                              href="/api/custom-forms/export"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center px-2 py-1.5 text-sm"
+                            >
+                              <FileDown className="h-4 w-4 mr-2" />
+                              Xuất Excel
+                            </a>
+                          </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
                             onClick={() => confirmDelete(form)}
