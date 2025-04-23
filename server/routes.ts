@@ -1356,6 +1356,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error retrieving custom forms" });
     }
   });
+  
+  // Export Forms endpoint
+  app.get("/api/custom-forms/export", isAdmin, async (req, res) => {
+    try {
+      // Get all forms
+      const forms = await storage.listCustomForms();
+      
+      // Prepare data for export 
+      const exportData = forms.map(form => {
+        // Count fields
+        let fieldCount = 0;
+        if (Array.isArray(form.fields)) {
+          fieldCount = form.fields.length;
+        }
+        
+        return {
+          id: form.id,
+          name: form.name,
+          description: form.description || '',
+          fieldCount: fieldCount,
+          createdAt: form.createdAt,
+        };
+      });
+      
+      // Generate Excel
+      const filename = `custom_forms_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const buffer = await exportToExcel(exportData, filename);
+      
+      // Send file
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(filename)}`);
+      res.send(buffer);
+    } catch (error: any) {
+      console.error("Error exporting forms:", error);
+      res.status(500).json({ message: "Error exporting forms", error: error.message });
+    }
+  });
 
   app.get("/api/custom-forms/:id", isAdmin, async (req, res) => {
     try {
