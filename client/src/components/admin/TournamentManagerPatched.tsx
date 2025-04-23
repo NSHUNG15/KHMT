@@ -41,7 +41,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, MoreHorizontal, Plus, Download, Pencil, Trash, UsersRound, Trophy, Table2 } from "lucide-react";
-import { format as formatDate } from "date-fns";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tournament } from "@shared/schema";
@@ -347,6 +347,10 @@ const TournamentManager = () => {
     setIsBracketGenDialogOpen(true);
   };
 
+  const formatDate = (date: Date, formatStr: string) => {
+    return format(date, formatStr);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -539,7 +543,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP") : <span>Chọn ngày</span>}
+                          {startDate ? formatDate(startDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -565,7 +569,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "PPP") : <span>Chọn ngày</span>}
+                          {endDate ? formatDate(endDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -591,7 +595,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {registrationDeadline ? format(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
+                          {registrationDeadline ? formatDate(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -760,7 +764,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP") : <span>Chọn ngày</span>}
+                          {startDate ? formatDate(startDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -786,7 +790,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "PPP") : <span>Chọn ngày</span>}
+                          {endDate ? formatDate(endDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -812,7 +816,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {registrationDeadline ? format(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
+                          {registrationDeadline ? formatDate(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">

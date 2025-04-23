@@ -10,8 +10,9 @@ import { useQuery } from "@tanstack/react-query";
 
 // Import Admin Components
 import EventManager from "@/components/admin/EventManager";
-import TournamentManager from "@/components/admin/TournamentManager";
+import TournamentManager from "@/components/admin/TournamentManagerPatched";
 import FormManager from "@/components/admin/FormManager";
+import AnnouncementManager from "@/components/admin/AnnouncementManager";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -66,12 +67,7 @@ const AdminDashboard = () => {
       case 'forms':
         return <FormManager />;
       case 'announcements':
-        return (
-          <div className="p-8 text-center">
-            <h3 className="text-lg font-medium mb-2">Quản lý thông báo</h3>
-            <p className="text-muted-foreground">Tính năng đang được phát triển</p>
-          </div>
-        );
+        return <AnnouncementManager />;
       default:
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
