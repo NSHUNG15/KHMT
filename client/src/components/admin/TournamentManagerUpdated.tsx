@@ -266,7 +266,8 @@ const TournamentManager = () => {
     setMaxTeams(tournament.maxTeams || 0);
     setIsPublished(tournament.isPublished);
     setStatus(tournament.status);
-    setSelectedFormId(tournament.formId);
+    // Handle undefined or null here
+    setSelectedFormId(tournament.formId || undefined);
     setIsEditDialogOpen(true);
   };
 
@@ -309,11 +310,11 @@ const TournamentManager = () => {
         registrationDeadline: registrationDeadline ? registrationDeadline.toISOString() : undefined,
         sportType,
         format,
-        maxTeams: maxTeams || null,
+        maxTeams: maxTeams || undefined,
         isPublished,
         status,
         createdBy: user.id,
-        formId: formId ? formId : undefined
+        formId: formId || undefined
       });
     } catch (error: any) {
       toast({
@@ -360,10 +361,10 @@ const TournamentManager = () => {
           registrationDeadline: registrationDeadline ? registrationDeadline.toISOString() : undefined,
           sportType,
           format,
-          maxTeams: maxTeams || null,
+          maxTeams: maxTeams || undefined,
           isPublished,
           status,
-          formId: formId ? formId : undefined
+          formId: formId || undefined
         },
       });
     } catch (error: any) {

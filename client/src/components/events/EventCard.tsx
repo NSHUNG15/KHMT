@@ -54,7 +54,7 @@ const EventCard = ({ event, variant = "default" }: EventCardProps) => {
     enabled: event.capacity !== null && event.capacity !== undefined,
   });
 
-  const registeredCount = registrations?.length || 0;
+  const registeredCount = Array.isArray(registrations) ? registrations.length : 0;
   const isFull = event.capacity ? registeredCount >= event.capacity : false;
 
   const getStatusBadge = () => {
