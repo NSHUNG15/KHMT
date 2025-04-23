@@ -308,14 +308,21 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
       {!readOnly && (
         <div className="flex justify-between mb-4">
           <Button
+            type="button"
             variant="outline"
-            onClick={() => setIsPreviewOpen(true)}
+            onClick={(e) => {
+              e.preventDefault();
+              setIsPreviewOpen(true);
+            }}
           >
             <Eye className="w-4 h-4 mr-2" />
             Xem trước
           </Button>
           
-          <Button onClick={handleAddField}>
+          <Button type="button" onClick={(e) => {
+              e.preventDefault(); // Ngăn chặn sự kiện submit form
+              handleAddField();
+            }}>
             <Plus className="w-4 h-4 mr-2" />
             Thêm trường
           </Button>
@@ -488,15 +495,20 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
 
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 setIsFieldDialogOpen(false);
                 setEditingField(null);
               }}
             >
               Hủy
             </Button>
-            <Button onClick={handleSaveField}>Lưu</Button>
+            <Button type="button" onClick={(e) => {
+              e.preventDefault();
+              handleSaveField();
+            }}>Lưu</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -536,7 +548,11 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
 
           <DialogFooter>
             <Button
-              onClick={() => setIsPreviewOpen(false)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsPreviewOpen(false);
+              }}
             >
               Đóng
             </Button>
