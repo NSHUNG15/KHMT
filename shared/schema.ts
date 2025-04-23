@@ -24,6 +24,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   studentId: true,
   faculty: true,
   major: true,
+  role: true,
 });
 
 // Announcements Table

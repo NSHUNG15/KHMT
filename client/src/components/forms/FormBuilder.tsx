@@ -82,6 +82,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
       required: false,
       options: ["Tùy chọn 1", "Tùy chọn 2"],
     };
+    console.log("Creating new field:", newField);
     setEditingField(newField);
     setIsFieldDialogOpen(true);
   };
