@@ -45,8 +45,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tournament } from "@shared/schema";
-import FormSelector from "@/components/forms/FormSelector";
 import FormBuilder from "@/components/forms/FormBuilder";
+import FormSelector from "@/components/forms/FormSelector";
 
 const sportTypes = [
   { value: "soccer", label: "Bóng đá" },
@@ -275,23 +275,52 @@ const TournamentManager = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    createTournamentMutation.mutate({
-      name,
-      description,
-      startDate,
-      endDate,
-      registrationDeadline,
-      sportType,
-      format,
-      maxTeams: maxTeams || null,
-      isPublished,
-      status,
-      createdBy: user.id,
-    });
+    try {
+      // Nếu có formFields mới và không chọn form có sẵn, tạo form mới
+      let formId = selectedFormId;
+      
+      if (!formId && formFields.length > 0) {
+        // Tạo form mới
+        const formRes = await apiRequest('POST', '/api/forms', {
+          name: `Form đăng ký giải đấu ${name}`,
+          fields: formFields,
+          createdBy: user.id
+        });
+        const newForm = await formRes.json();
+        formId = newForm.id;
+        
+        toast({
+          title: "Tạo biểu mẫu thành công",
+          description: "Biểu mẫu đăng ký đã được tạo"
+        });
+      }
+      
+      // Tạo giải đấu với biểu mẫu (nếu có)
+      createTournamentMutation.mutate({
+        name,
+        description,
+        startDate,
+        endDate,
+        registrationDeadline,
+        sportType,
+        format,
+        maxTeams: maxTeams || null,
+        isPublished,
+        status,
+        createdBy: user.id,
+        formId: formId || null
+      });
+    } catch (error: any) {
+      toast({
+        title: "Lỗi khi tạo biểu mẫu",
+        description: error.message || "Đã xảy ra lỗi, vui lòng thử lại sau",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
@@ -481,6 +510,7 @@ const TournamentManager = () => {
                 <TabsTrigger value="basic">Thông tin cơ bản</TabsTrigger>
                 <TabsTrigger value="dates">Thời gian</TabsTrigger>
                 <TabsTrigger value="format">Định dạng giải đấu</TabsTrigger>
+                <TabsTrigger value="form">Biểu mẫu đăng ký</TabsTrigger>
               </TabsList>
               
               <TabsContent value="basic" className="space-y-4">
@@ -702,6 +732,7 @@ const TournamentManager = () => {
                 <TabsTrigger value="basic">Thông tin cơ bản</TabsTrigger>
                 <TabsTrigger value="dates">Thời gian</TabsTrigger>
                 <TabsTrigger value="format">Định dạng giải đấu</TabsTrigger>
+                <TabsTrigger value="form">Biểu mẫu đăng ký</TabsTrigger>
               </TabsList>
               
               <TabsContent value="basic" className="space-y-4">
