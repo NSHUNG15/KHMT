@@ -21,6 +21,7 @@ const MemoryStore = createMemoryStore(session);
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;  // Add this for MongoDB ObjectId lookups
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -144,6 +145,11 @@ export class MongoStorage implements IStorage {
   // Users
   async getUser(id: number): Promise<User | undefined> {
     const user = await User.findOne({ id });
+    return user || undefined;
+  }
+  
+  async getUserById(id: string): Promise<User | undefined> {
+    const user = await User.findById(id);
     return user || undefined;
   }
 

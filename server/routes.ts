@@ -129,13 +129,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Set user session
-      req.session.userId = user.id;
+      // Set user session - MongoDB model will have both _id and id
+      req.session.userId = user._id ? user._id.toString() : user.id;
+      req.session.numericId = user.id;
 
       // Return user without password
       const { password: _, ...userWithoutPassword } = user;
       res.status(200).json(userWithoutPassword);
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Error during login" });
     }
   });
@@ -155,7 +157,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const user = await storage.getUser(req.session.userId);
+      // Try to get user by MongoDB _id or by numeric id
+      let user;
+      if (req.session.userId && typeof req.session.userId === 'string' && req.session.userId.length === 24) {
+        // Use MongoDB getUserById method if it's a MongoDB ObjectId
+        user = await storage.getUserById(req.session.userId);
+      } else if (req.session.numericId) {
+        // Use numeric ID as fallback
+        user = await storage.getUser(req.session.numericId);
+      } else {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -164,6 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userWithoutPassword } = user;
       res.status(200).json(userWithoutPassword);
     } catch (error) {
+      console.error("Error getting current user:", error);
       res.status(500).json({ message: "Error retrieving user" });
     }
   });
