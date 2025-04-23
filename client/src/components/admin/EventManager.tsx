@@ -244,14 +244,18 @@ const EventManager = () => {
     
     try {
       // Cố gắng phân tích formTemplate từ event
+      console.log("Loading form template:", event.formTemplate);
       if (event.formTemplate && typeof event.formTemplate === 'object') {
-        const fields = event.formTemplate.fields || [];
+        const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
+        console.log("Parsed form fields (object):", fields);
         setFormFields(fields);
       } else if (typeof event.formTemplate === 'string') {
         const parsedTemplate = JSON.parse(event.formTemplate);
-        const fields = parsedTemplate.fields || [];
+        const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
+        console.log("Parsed form fields (string):", fields);
         setFormFields(fields);
       } else {
+        console.log("No form template found, setting empty array");
         setFormFields([]);
       }
     } catch (e) {
@@ -270,6 +274,16 @@ const EventManager = () => {
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Kiểm tra xem form có dữ liệu cần thiết không
+    if (!title.trim()) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập tên sự kiện",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Lấy dữ liệu người dùng từ localStorage hoặc sử dụng hook auth
     let createdBy = 1; // Mặc định ID = 1 nếu không tìm thấy
     try {
@@ -281,6 +295,9 @@ const EventManager = () => {
       console.error("Lỗi khi lấy thông tin người dùng:", e);
     }
     
+    // Đảm bảo formFields là một mảng
+    const safeFormFields = Array.isArray(formFields) ? formFields : [];
+    
     const eventData = {
       title,
       description,
@@ -290,7 +307,7 @@ const EventManager = () => {
       registrationDeadline,
       capacity: capacity || null,
       isPublished,
-      formTemplate: { fields: formFields },
+      formTemplate: { fields: safeFormFields },
       createdBy,
     };
     
@@ -303,6 +320,19 @@ const EventManager = () => {
     e.preventDefault();
     if (!selectedEvent) return;
     
+    // Kiểm tra xem form có dữ liệu cần thiết không
+    if (!title.trim()) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập tên sự kiện",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Đảm bảo formFields là một mảng
+    const safeFormFields = Array.isArray(formFields) ? formFields : [];
+    
     const eventData = {
       title,
       description,
@@ -312,7 +342,7 @@ const EventManager = () => {
       registrationDeadline,
       capacity: capacity || null,
       isPublished,
-      formTemplate: { fields: formFields },
+      formTemplate: { fields: safeFormFields },
     };
     
     console.log("Updating event data:", eventData);
@@ -419,14 +449,18 @@ const EventManager = () => {
                               
                               // Cố gắng phân tích formTemplate từ event
                               try {
+                                console.log("Loading form template for update dialog:", event.formTemplate);
                                 if (event.formTemplate && typeof event.formTemplate === 'object') {
-                                  const fields = event.formTemplate.fields || [];
+                                  const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
+                                  console.log("Parsed form fields for update dialog (object):", fields);
                                   setFormFields(fields);
                                 } else if (typeof event.formTemplate === 'string') {
                                   const parsedTemplate = JSON.parse(event.formTemplate);
-                                  const fields = parsedTemplate.fields || [];
+                                  const fields = Array.isArray(parsedTemplate.fields) ? parsedTemplate.fields : [];
+                                  console.log("Parsed form fields for update dialog (string):", fields);
                                   setFormFields(fields);
                                 } else {
+                                  console.log("No form template found for update dialog, setting empty array");
                                   setFormFields([]);
                                 }
                               } catch (e) {
