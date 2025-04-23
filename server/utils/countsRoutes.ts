@@ -6,7 +6,7 @@ import { storage } from '../mongoStorage';
  * @param app Express application
  */
 export function registerCountsRoutes(app: Express) {
-  // Get counts of users
+  // Get counts of users (for authenticated users, since it's used in admin dashboard)
   app.get('/api/users/count', async (req, res) => {
     try {
       const count = await storage.getCount('users');
@@ -17,7 +17,7 @@ export function registerCountsRoutes(app: Express) {
     }
   });
 
-  // Get counts of announcements
+  // Get counts of announcements (public route)
   app.get('/api/announcements/count', async (req, res) => {
     try {
       const count = await storage.getCount('announcements');
@@ -28,7 +28,7 @@ export function registerCountsRoutes(app: Express) {
     }
   });
 
-  // Get counts of events
+  // Get counts of events (public route)
   app.get('/api/events/count', async (req, res) => {
     try {
       const count = await storage.getCount('events');
@@ -39,7 +39,7 @@ export function registerCountsRoutes(app: Express) {
     }
   });
 
-  // Get counts of tournaments
+  // Get counts of tournaments (public route)
   app.get('/api/tournaments/count', async (req, res) => {
     try {
       const count = await storage.getCount('tournaments');
@@ -50,7 +50,7 @@ export function registerCountsRoutes(app: Express) {
     }
   });
 
-  // Get counts of forms 
+  // Get counts of forms (public route)
   app.get('/api/forms/count', async (req, res) => {
     try {
       const count = await storage.getCount('customForms');
@@ -58,6 +58,17 @@ export function registerCountsRoutes(app: Express) {
     } catch (error) {
       console.error('Error getting forms count:', error);
       res.status(500).json({ message: 'Error retrieving forms count' });
+    }
+  });
+  
+  // Add a handler for API/forms which is also needed
+  app.get('/api/forms', async (req, res) => {
+    try {
+      const forms = await storage.listCustomForms();
+      res.status(200).json(forms);
+    } catch (error) {
+      console.error('Error getting forms:', error);
+      res.status(500).json({ message: 'Error retrieving forms' });
     }
   });
 }
