@@ -40,11 +40,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, MoreHorizontal, Plus, Download, Pencil, Trash, UsersRound, Trophy, Table2 } from "lucide-react";
+import { CalendarIcon, MoreHorizontal, Plus, Download, Pencil, Trash, UsersRound, Trophy, Table2, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tournament } from "@shared/schema";
+import FormSelector from "@/components/forms/FormSelector";
+import FormBuilder from "@/components/forms/FormBuilder";
 
 const sportTypes = [
   { value: "soccer", label: "Bóng đá" },
@@ -85,6 +87,8 @@ const TournamentManager = () => {
   const [maxTeams, setMaxTeams] = useState<number>(0);
   const [isPublished, setIsPublished] = useState(false);
   const [status, setStatus] = useState("draft");
+  const [selectedFormId, setSelectedFormId] = useState<number | undefined>(undefined);
+  const [formFields, setFormFields] = useState<any[]>([]);
 
   // Tournament query
   const { data: tournaments = [], isLoading } = useQuery<Tournament[]>({
@@ -247,6 +251,8 @@ const TournamentManager = () => {
     setMaxTeams(0);
     setIsPublished(false);
     setStatus("draft");
+    setSelectedFormId(undefined);
+    setFormFields([]);
   };
 
   const loadTournamentToEdit = (tournament: Tournament) => {
@@ -347,9 +353,9 @@ const TournamentManager = () => {
     setIsBracketGenDialogOpen(true);
   };
 
-  const formatDate = (date: Date, formatStr: string) => {
+  function formatDate(date: Date, formatStr: string) {
     return format(date, formatStr);
-  };
+  }
 
   return (
     <div className="space-y-6">
