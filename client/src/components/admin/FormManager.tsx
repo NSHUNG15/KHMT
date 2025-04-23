@@ -104,11 +104,11 @@ const FormManager = () => {
   // Create form mutation
   const createFormMutation = useMutation({
     mutationFn: async (newForm: any) => {
-      const res = await apiRequest('POST', '/api/forms', newForm);
+      const res = await apiRequest('POST', '/api/custom-forms', newForm);
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/forms'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/custom-forms'] });
       toast({
         title: "Tạo biểu mẫu thành công",
         description: "Biểu mẫu mới đã được tạo",
@@ -128,11 +128,11 @@ const FormManager = () => {
   // Update form mutation
   const updateFormMutation = useMutation({
     mutationFn: async ({ id, formData }: { id: number; formData: any }) => {
-      const res = await apiRequest('PATCH', `/api/forms/${id}`, formData);
+      const res = await apiRequest('PATCH', `/api/custom-forms/${id}`, formData);
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/forms'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/custom-forms'] });
       toast({
         title: "Cập nhật biểu mẫu thành công",
         description: "Biểu mẫu đã được cập nhật",
@@ -152,10 +152,10 @@ const FormManager = () => {
   // Delete form mutation
   const deleteFormMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/forms/${id}`);
+      await apiRequest('DELETE', `/api/custom-forms/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/forms'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/custom-forms'] });
       toast({
         title: "Xóa biểu mẫu thành công",
         description: "Biểu mẫu đã được xóa",

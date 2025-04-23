@@ -1265,15 +1265,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating custom form with request body:", req.body);
       const userId = req.session.userId!;
       
-      // Ensure fields is an array
-      let formFields = req.body.fields;
-      if (!formFields || !Array.isArray(formFields)) {
-        formFields = [];
-      }
-      
       const formData = {
         name: req.body.name || "Untitled Form",
-        fields: formFields,
+        fields: req.body.fields || [], // Assuming fields is in req.body.fields
         createdBy: userId
       };
       
