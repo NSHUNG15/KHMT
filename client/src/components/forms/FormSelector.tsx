@@ -67,6 +67,7 @@ const FormSelector: React.FC<FormSelectorProps> = ({
       return;
     }
 
+    // Chọn form và đóng dialog
     onSelect(parseInt(selectedForm));
     setOpen(false);
   };

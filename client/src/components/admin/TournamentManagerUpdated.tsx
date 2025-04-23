@@ -278,6 +278,17 @@ const TournamentManager = () => {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Nếu người dùng chưa điền thông tin cơ bản, hiển thị thông báo
+    if (!name || !description || !sportType || !format) {
+      toast({
+        title: "Thiếu thông tin",
+        description: "Vui lòng điền đầy đủ thông tin cơ bản cho giải đấu",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     try {
