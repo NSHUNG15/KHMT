@@ -165,6 +165,11 @@ const EventManager = () => {
   // Registration export mutation
   const exportRegistrationsMutation = useMutation({
     mutationFn: async (eventId: number) => {
+      // Hiển thị thông báo đang tải
+      toast({
+        title: "Đang xuất dữ liệu...",
+        description: "Vui lòng đợi trong giây lát",
+      });
       const res = await apiRequest('GET', `/api/events/${eventId}/registrations/export`, {});
       return res;
     },
@@ -439,14 +444,28 @@ const EventManager = () => {
                     </TableCell>
                     <TableCell>{event.location}</TableCell>
                     <TableCell className="text-center">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => openRegistrationsView(event)}
-                      >
-                        <Users className="h-4 w-4 mr-2" />
-                        Xem đăng ký
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openRegistrationsView(event)}
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Xem đăng ký
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            exportRegistrationsMutation.mutate(event.id);
+                          }}
+                          disabled={exportRegistrationsMutation.isPending}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Xuất Excel
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full text-xs ${event.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
