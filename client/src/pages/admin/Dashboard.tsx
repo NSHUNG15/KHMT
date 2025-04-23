@@ -16,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -106,9 +105,9 @@ const AdminDashboard = () => {
                       Điền thông tin sự kiện mới
                     </DialogDescription>
                   </DialogHeader>
-                  <Form>
-                    {/* Form fields */}
-                  </Form>
+                  <div>
+                    {/* Form fields will be added here */}
+                  </div>
                 </DialogContent>
               </Dialog>
             </CardHeader>
@@ -118,25 +117,14 @@ const AdminDashboard = () => {
                 columns={[
                   { header: "Tên sự kiện", accessorKey: "title" },
                   { header: "Ngày bắt đầu", accessorKey: "startDate" },
-                  { header: "Trạng thái", accessorKey: "status" },
-                  { 
-                    header: "Thao tác",
-                    cell: (row) => (
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Sửa</Button>
-                        <Button variant="destructive" size="sm">Xóa</Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleExportExcel(row.id)}
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Xuất Excel
-                        </Button>
-                      </div>
-                    )
-                  }
+                  { header: "Trạng thái", accessorKey: "status", cell: (row) => row.status || "Đang hoạt động" }
                 ]}
+                onEdit={(row) => {
+                  console.log("Edit event", row);
+                }}
+                onDelete={(row) => {
+                  console.log("Delete event", row);
+                }}
               />
             </CardContent>
           </Card>
@@ -160,9 +148,9 @@ const AdminDashboard = () => {
                       Điền thông tin giải đấu mới
                     </DialogDescription>
                   </DialogHeader>
-                  <Form>
-                    {/* Form fields */}
-                  </Form>
+                  <div>
+                    {/* Form fields will be added here */}
+                  </div>
                 </DialogContent>
               </Dialog>
             </CardHeader>
@@ -172,18 +160,17 @@ const AdminDashboard = () => {
                 columns={[
                   { header: "Tên giải đấu", accessorKey: "name" },
                   { header: "Môn thể thao", accessorKey: "sportType" },
-                  { header: "Trạng thái", accessorKey: "status" },
-                  { 
-                    header: "Thao tác",
-                    cell: (row) => (
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Quản lý</Button>
-                        <Button variant="outline" size="sm">Sửa</Button>
-                        <Button variant="destructive" size="sm">Xóa</Button>
-                      </div>
-                    )
-                  }
+                  { header: "Trạng thái", accessorKey: "status", cell: (row) => row.status || "Đang hoạt động" }
                 ]}
+                onView={(row) => {
+                  console.log("View tournament", row);
+                }}
+                onEdit={(row) => {
+                  console.log("Edit tournament", row);
+                }}
+                onDelete={(row) => {
+                  console.log("Delete tournament", row);
+                }}
               />
             </CardContent>
           </Card>
@@ -201,27 +188,17 @@ const AdminDashboard = () => {
               <DataTable 
                 data={registrations || []}
                 columns={[
-                  { header: "Người đăng ký", accessorKey: "user.fullName" },
-                  { header: "Sự kiện", accessorKey: "event.title" },
+                  { header: "Người đăng ký", accessorKey: "userId", cell: (row) => row.user?.fullName || `Người dùng #${row.userId}` },
+                  { header: "Sự kiện", accessorKey: "eventId", cell: (row) => row.event?.title || `Sự kiện #${row.eventId}` },
                   { header: "Ngày đăng ký", accessorKey: "registeredAt" },
-                  { header: "Trạng thái", accessorKey: "status" },
-                  { 
-                    header: "Thao tác",
-                    cell: (row) => (
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Xem chi tiết</Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleExportExcel(row.eventId)}
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Xuất Excel
-                        </Button>
-                      </div>
-                    )
-                  }
+                  { header: "Trạng thái", accessorKey: "status", cell: (row) => row.status || "Chờ xác nhận" }
                 ]}
+                onView={(row) => {
+                  console.log("View registration", row);
+                }}
+                onEdit={(row) => {
+                  console.log("Edit registration", row);
+                }}
               />
             </CardContent>
           </Card>
