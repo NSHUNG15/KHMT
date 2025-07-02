@@ -18,7 +18,7 @@ const EventCard = ({ event }: { event: any }) => {
     enabled: event.capacity !== null && event.capacity !== undefined,
   });
 
-  const registeredCount = registrations?.length || 0;
+  const registeredCount = Array.isArray(registrations) ? registrations.length : 0;
   
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -101,7 +101,7 @@ const EventSkeleton = () => (
 const Events = () => {
   const { toast } = useToast();
   
-  const { data: events, isLoading, error } = useQuery({
+  const { data: events = [], isLoading, error } = useQuery<any[]>({
     queryKey: ['/api/events', { limit: 3 }],
     retry: 1,
   });

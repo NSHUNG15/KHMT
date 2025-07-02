@@ -221,19 +221,19 @@ const TournamentManager = () => {
   });
 
   // Teams, Matches and Standings queries
-  const { data: teams = [], isLoading: teamsLoading } = useQuery({
+  const { data: teams = [], isLoading: teamsLoading } = useQuery<any[]>({
     queryKey: ['/api/teams', selectedTournament?.id],
     enabled: Boolean(selectedTournament) && isTeamsViewOpen,
     staleTime: 5000,
   });
 
-  const { data: matches = [], isLoading: matchesLoading } = useQuery({
+  const { data: matches = [], isLoading: matchesLoading } = useQuery<any[]>({
     queryKey: ['/api/matches', selectedTournament?.id],
     enabled: Boolean(selectedTournament) && isMatchesViewOpen,
     staleTime: 5000,
   });
 
-  const { data: standings = [], isLoading: standingsLoading } = useQuery({
+  const { data: standings = [], isLoading: standingsLoading } = useQuery<any[]>({
     queryKey: ['/api/standings', selectedTournament?.id],
     enabled: Boolean(selectedTournament) && isStandingsViewOpen,
     staleTime: 5000,
@@ -381,8 +381,8 @@ const TournamentManager = () => {
     setIsBracketGenDialogOpen(true);
   };
 
-  function formatDate(date: Date, formatStr: string) {
-    return format(date, formatStr);
+  function formatDate(date: Date, dateFormat: string) {
+    return format(date, dateFormat);
   }
 
   return (

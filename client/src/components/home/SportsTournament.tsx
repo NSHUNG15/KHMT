@@ -10,7 +10,7 @@ import { Trophy, Clock, Check } from "lucide-react";
 
 // Upcoming Matches component
 const UpcomingMatches = () => {
-  const { data: tournaments, isLoading: tournamentsLoading } = useQuery({
+  const { data: tournaments, isLoading: tournamentsLoading } = useQuery<any[]>({
     queryKey: ['/api/tournaments', { limit: 1 }],
   });
   
@@ -28,14 +28,14 @@ const UpcomingMatches = () => {
   
   // Helper to get team name by ID
   const getTeamName = (teamId: number) => {
-    if (!teams) return "TBD";
+    if (!Array.isArray(teams)) return "TBD";
     const team = teams.find((t: any) => t.id === teamId);
     return team ? team.name : "TBD";
   };
   
   // Filter upcoming matches and sort by date
   const upcomingMatches = React.useMemo(() => {
-    if (!matches) return [];
+    if (!Array.isArray(matches)) return [];
     
     return matches
       .filter((match: any) => match.status !== "completed")
@@ -132,7 +132,7 @@ const UpcomingMatches = () => {
 
 // Team Rankings component
 const TeamRankings = () => {
-  const { data: tournaments, isLoading: tournamentsLoading } = useQuery({
+  const { data: tournaments, isLoading: tournamentsLoading } = useQuery<any[]>({
     queryKey: ['/api/tournaments', { limit: 1 }],
   });
   
@@ -154,7 +154,7 @@ const TeamRankings = () => {
   
   const tournament = tournaments?.[0];
   
-  if (!tournament || !standings || standings.length === 0) {
+  if (!tournament || !Array.isArray(standings) || standings.length === 0) {
     return (
       <div className="bg-white shadow-md rounded-lg overflow-hidden p-6 text-center">
         <Trophy className="mx-auto h-12 w-12 text-gray-400" />
@@ -222,7 +222,7 @@ const TeamRankings = () => {
 
 // Tournament Registration component
 const TournamentRegistration = () => {
-  const { data: activeTournament, isLoading } = useQuery({
+  const { data: activeTournament, isLoading } = useQuery<any[]>({
     queryKey: ['/api/tournaments', { limit: 1 }],
   });
 

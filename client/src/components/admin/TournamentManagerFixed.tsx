@@ -199,7 +199,7 @@ const TournamentManager: React.FC = () => {
     setMaxTeams(tournament.maxTeams || undefined);
     setIsPublished(tournament.isPublished);
     setStatus(tournament.status);
-    setSelectedFormId(tournament.formId);
+    setSelectedFormId(tournament.formId ?? undefined);
     setIsEditDialogOpen(true);
   };
 

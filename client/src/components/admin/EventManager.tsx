@@ -264,8 +264,13 @@ const EventManager = () => {
       // Cố gắng phân tích formTemplate từ event
       console.log("Loading form template:", event.formTemplate);
       if (event.formTemplate && typeof event.formTemplate === 'object') {
-        if (event.formTemplate && event.formTemplate.fields) {
-          const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
+        if (
+          event.formTemplate &&
+          typeof event.formTemplate === "object" &&
+          "fields" in event.formTemplate &&
+          Array.isArray((event.formTemplate as any).fields)
+        ) {
+          const fields = (event.formTemplate as any).fields;
           console.log("Parsed form fields (object):", fields);
           setFormFields(fields);
         } else {
@@ -493,8 +498,8 @@ const EventManager = () => {
                               try {
                                 console.log("Loading form template for update dialog:", event.formTemplate);
                                 if (event.formTemplate && typeof event.formTemplate === 'object') {
-                                  if (event.formTemplate && event.formTemplate.fields) {
-                                    const fields = Array.isArray(event.formTemplate.fields) ? event.formTemplate.fields : [];
+                                  if (event.formTemplate && (event.formTemplate as any).fields) {
+                                    const fields = Array.isArray((event.formTemplate as any).fields) ? (event.formTemplate as any).fields : [];
                                     console.log("Parsed form fields for update dialog (object):", fields);
                                     setFormFields(fields);
                                   } else {

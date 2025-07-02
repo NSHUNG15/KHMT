@@ -218,19 +218,19 @@ const TournamentManager = () => {
   });
 
   // Teams, Matches and Standings queries
-  const { data: teams = [], isLoading: teamsLoading } = useQuery({
+  const { data: teams = [], isLoading: teamsLoading } = useQuery<any[]>({
     queryKey: ['/api/teams', selectedTournament?.id],
     enabled: Boolean(selectedTournament) && isTeamsViewOpen,
     staleTime: 5000,
   });
 
-  const { data: matches = [], isLoading: matchesLoading } = useQuery({
+  const { data: matches = [], isLoading: matchesLoading } = useQuery<any[]>({
     queryKey: ['/api/matches', selectedTournament?.id],
     enabled: Boolean(selectedTournament) && isMatchesViewOpen,
     staleTime: 5000,
   });
 
-  const { data: standings = [], isLoading: standingsLoading } = useQuery({
+  const { data: standings = [], isLoading: standingsLoading } = useQuery<any[]>({
     queryKey: ['/api/standings', selectedTournament?.id],
     enabled: Boolean(selectedTournament) && isStandingsViewOpen,
     staleTime: 5000,
@@ -539,7 +539,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP") : <span>Chọn ngày</span>}
+                          {startDate ? formatDate(startDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -565,7 +565,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "PPP") : <span>Chọn ngày</span>}
+                          {endDate ? formatDate(endDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -591,7 +591,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {registrationDeadline ? format(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
+                          {registrationDeadline ? formatDate(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -760,7 +760,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP") : <span>Chọn ngày</span>}
+                          {startDate ? formatDate(startDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -786,7 +786,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "PPP") : <span>Chọn ngày</span>}
+                          {endDate ? formatDate(endDate, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -812,7 +812,7 @@ const TournamentManager = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {registrationDeadline ? format(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
+                          {registrationDeadline ? formatDate(registrationDeadline, "PPP") : <span>Chọn ngày</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">

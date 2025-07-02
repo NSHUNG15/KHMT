@@ -91,7 +91,7 @@ const AnnouncementSkeleton = () => (
 const Announcements = () => {
   const { toast } = useToast();
   
-  const { data: announcements, isLoading, error } = useQuery({
+  const { data: announcements = [], isLoading, error } = useQuery<any[]>({
     queryKey: ['/api/announcements', { limit: 3 }],
     retry: 1,
   });
