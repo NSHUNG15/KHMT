@@ -44,6 +44,17 @@ import { Separator } from "@/components/ui/separator";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Define the EventRegistration type if not imported from elsewhere
+type EventRegistration = {
+  id: string;
+  eventId: string;
+  registeredAt: string;
+  status: 'approved' | 'rejected' | 'pending';
+  event?: {
+    title?: string;
+  };
+};
+
 const profileFormSchema = z.object({
   fullName: z.string().min(2, {
     message: "Họ và tên phải có ít nhất 2 ký tự",
@@ -84,7 +95,7 @@ const ProfilePage = () => {
   const { 
     data: registrations, 
     isLoading: registrationsLoading 
-  } = useQuery({
+  } = useQuery<EventRegistration[]>({
     queryKey: ['/api/events/registrations'],
     enabled: !!user,
   });

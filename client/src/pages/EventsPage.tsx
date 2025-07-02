@@ -19,9 +19,18 @@ const EventsPage = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: events, isLoading, error } = useQuery({
-    queryKey: ['/api/events'],
-  });
+  type Event = {
+    id: string;
+    title: string;
+    description: string;
+    startDate: string;
+    registrationDeadline?: string;
+    // Add other properties as needed
+  };
+  
+    const { data: events, isLoading, error } = useQuery<Event[]>({
+      queryKey: ['/api/events'],
+    });
 
   React.useEffect(() => {
     if (error) {
@@ -41,14 +50,11 @@ const EventsPage = () => {
     if (!events) {
       return { upcomingEvents: [], pastEvents: [] };
     }
-
     const now = new Date();
-    
     // Filter events based on date, search query, and category
-    const filtered = events.filter((event: any) => {
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           event.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
+    const filtered = events.filter((event) => {
+      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase());
       let matchesCategory = true;
       if (selectedCategory !== "all") {
         if (selectedCategory === "open_registration") {
@@ -59,17 +65,13 @@ const EventsPage = () => {
           matchesCategory = true;
         }
       }
-      
       return matchesSearch && matchesCategory;
     });
-    
     // Split into upcoming and past
-    const upcoming = filtered.filter((event: any) => new Date(event.startDate) >= now)
-      .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-    
-    const past = filtered.filter((event: any) => new Date(event.startDate) < now)
-      .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
-    
+    const upcoming = filtered.filter((event) => new Date(event.startDate) >= now)
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const past = filtered.filter((event) => new Date(event.startDate) < now)
+      .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
     return { upcomingEvents: upcoming, pastEvents: past };
   }, [events, searchQuery, selectedCategory]);
 

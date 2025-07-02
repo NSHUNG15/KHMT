@@ -235,7 +235,7 @@ const TournamentRegistration = () => {
   const tournament = activeTournament?.[0];
 
   return (
-    <div className="mt-8 bg-gradient-to-r from-primary to-primary-800 rounded-lg shadow-md p-6">
+    <div className="mt-8 bg-gradient rounded-lg shadow-md p-6">
       <h3 className="text-xl font-bold mb-4">Đăng ký tham gia Hội thao</h3>
       <p className="mb-4">Hãy tham gia và thể hiện tài năng thể thao của bạn tại Hội thao sinh viên 2023!</p>
       <ul className="mb-4 space-y-2">

@@ -7,7 +7,7 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
-            <h2 className="text-3xl md:text-4xl font-bold font-special mb-4">Đoàn trường Khoa học Máy tính</h2>
+            <h2 className="text-2xl md:text-3xl font-bold font-special mb-4">Đoàn trường Khoa học Máy tính</h2>
             <p className="text-lg mb-6 text-primary-100">Kết nối, phát triển và đồng hành cùng sinh viên DTU</p>
             <div className="space-x-4">
               <Button

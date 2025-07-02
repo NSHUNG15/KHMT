@@ -15,11 +15,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Define the Tournament type if not imported from elsewhere
+type Tournament = {
+  id: string;
+  name: string;
+  description: string;
+  sportType: string;
+  startDate: string;
+  endDate: string;
+  // Add other fields as needed
+};
+
 const TournamentsPage = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: tournaments, isLoading, error } = useQuery({
+  const { data: tournaments, isLoading, error } = useQuery<Tournament[]>({
     queryKey: ['/api/tournaments'],
   });
 
@@ -39,8 +50,7 @@ const TournamentsPage = () => {
   // Get unique sport types from tournaments
   const sportTypes = React.useMemo(() => {
     if (!tournaments) return [];
-    
-    const types = new Set(tournaments.map((tournament: any) => tournament.sportType));
+    const types = new Set(tournaments.map((tournament) => tournament.sportType));
     return Array.from(types);
   }, [tournaments]);
 
@@ -49,30 +59,22 @@ const TournamentsPage = () => {
     if (!tournaments) {
       return { upcomingTournaments: [], ongoingTournaments: [], pastTournaments: [] };
     }
-
     const now = new Date();
-    
     // Filter tournaments based on search query and sport type
-    const filtered = tournaments.filter((tournament: any) => {
+    const filtered = tournaments.filter((tournament) => {
       const matchesSearch = tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           tournament.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
+        tournament.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSport = selectedSport === "all" || tournament.sportType === selectedSport;
-      
       return matchesSearch && matchesSport;
     });
-    
     // Split into upcoming, ongoing and past
-    const upcoming = filtered.filter((tournament: any) => new Date(tournament.startDate) > now)
-      .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-    
-    const ongoing = filtered.filter((tournament: any) => 
+    const upcoming = filtered.filter((tournament) => new Date(tournament.startDate) > now)
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const ongoing = filtered.filter((tournament) =>
       new Date(tournament.startDate) <= now && new Date(tournament.endDate) >= now
     );
-    
-    const past = filtered.filter((tournament: any) => new Date(tournament.endDate) < now)
-      .sort((a: any, b: any) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
-    
+    const past = filtered.filter((tournament) => new Date(tournament.endDate) < now)
+      .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
     return { upcomingTournaments: upcoming, ongoingTournaments: ongoing, pastTournaments: past };
   }, [tournaments, searchQuery, selectedSport]);
 

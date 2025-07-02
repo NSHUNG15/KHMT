@@ -62,8 +62,7 @@ const Newsletter = () => {
                   <MapPin className="h-5 w-5 text-secondary-400" />
                 </div>
                 <div className="ml-3 text-gray-300">
-                  <p>Phòng A210, Tòa nhà A, Đại học Duy Tân</p>
-                  <p>254 Nguyễn Văn Linh, Thanh Khê, Đà Nẵng</p>
+                  <p>Tầng 10, 03 Quang Trung,Đại học Duy Tân</p>
                 </div>
               </div>
               <div className="flex items-start">

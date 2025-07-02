@@ -53,6 +53,43 @@ import {
   Flag
 } from "lucide-react";
 
+// Define the Tournament type according to your API response structure
+interface Tournament {
+  id: string;
+  name: string;
+  sportType: string;
+  format: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline?: string;
+  maxTeams?: number;
+  imageUrl?: string;
+  description?: string;
+  registrationInstructions?: string;
+}
+
+// Define the Team type according to your API response structure
+interface Team {
+  id: string;
+  name: string;
+  createdAt?: string;
+  // Add other fields as needed
+}
+
+// Define the Standing type according to your API response structure
+interface Standing {
+  id: string;
+  teamId: string;
+  team?: Team;
+  rank?: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  points: number;
+}
+
 interface TournamentDetailPageProps {
   id: string;
 }
@@ -69,7 +106,7 @@ const TournamentDetailPage = ({ id }: TournamentDetailPageProps) => {
     data: tournament, 
     isLoading: tournamentLoading, 
     error: tournamentError 
-  } = useQuery({
+  } = useQuery<Tournament>({
     queryKey: [`/api/tournaments/${id}`],
   });
 
@@ -77,7 +114,7 @@ const TournamentDetailPage = ({ id }: TournamentDetailPageProps) => {
   const { 
     data: teams,
     isLoading: teamsLoading
-  } = useQuery({
+  } = useQuery<Team[]>({
     queryKey: [`/api/tournaments/${id}/teams`],
     enabled: !!tournament,
   });
@@ -86,7 +123,7 @@ const TournamentDetailPage = ({ id }: TournamentDetailPageProps) => {
   const { 
     data: standings,
     isLoading: standingsLoading
-  } = useQuery({
+  } = useQuery<Standing[]>({
     queryKey: [`/api/tournaments/${id}/standings`],
     enabled: !!tournament,
   });

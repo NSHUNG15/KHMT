@@ -16,7 +16,7 @@ export function Logo({ className, withText = true, size = "md" }: LogoProps) {
 
   return (
     <Link href="/" className={cn("flex items-center", className)}>
-      <svg 
+      {/* <svg 
         className={cn(sizeClasses[size], "text-primary")} 
         viewBox="0 0 24 24" 
         fill="none" 
@@ -40,7 +40,7 @@ export function Logo({ className, withText = true, size = "md" }: LogoProps) {
           d="M17 7C17.5523 7 18 6.55228 18 6C18 5.44772 17.5523 5 17 5C16.4477 5 16 5.44772 16 6C16 6.55228 16.4477 7 17 7Z" 
           fill="currentColor"
         />
-      </svg>
+      </svg> */}
       
       {withText && (
         <div className={cn("ml-2", size === "sm" ? "hidden md:block" : "")}>
