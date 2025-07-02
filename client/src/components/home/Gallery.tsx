@@ -44,7 +44,7 @@ const Gallery = () => {
       alt: "Sinh viên vui vẻ trong hoạt động ngoại khóa" 
     },
     { 
-      src: "https://images.unsplash.com/photo-1517486808906-6ca8b3f8e1c1?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80", 
+      src: "https://files01.duytan.edu.vn/svruploads/scs-duytan/upload/images/21-1-2021-10-51-16-15.JPG", 
       alt: "Sinh viên khoa CNTT đang lập trình" 
     },
     { 

@@ -186,7 +186,7 @@ const Newsletter = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-secondary hover:bg-secondary-700"
+                  className="w-full bg-secondary hover:bg-secondary-700 text-black"
                 >
                   Đăng ký
                 </Button>

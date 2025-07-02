@@ -95,8 +95,12 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-    const port = 3000; // Sử dụng cổng 3000
-  server.listen(port, "127.0.0.1", () => {
-    log(`serving on port ${port}`);
+   const port = 3000;
+  const host = "localhost";
+  
+  server.listen(port, host, () => {
+    const url = `http://${host}:${port}`;
+    log(`Server is running on ${url}`);
+    console.log(`You can access the application at: ${url}`); // Thêm dòng này để hiển thị link rõ ràng
   });
 })();
