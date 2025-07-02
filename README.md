@@ -41,13 +41,13 @@ Một nền tảng toàn diện dành cho Hội Sinh viên Khoa Khoa học Máy 
    npm run dev
    ```
 
-5. Truy cập ứng dụng tại http://localhost:5000
+5. Truy cập ứng dụng tại http://localhost:3000
 
 ## Hướng dẫn sử dụng
 
 - **Tài khoản Admin mặc định**:
   - Username: admin
-  - Password: adminpassword
+  - Password: admin
 
 - **Quản lý sự kiện**: Truy cập /admin/events để tạo và quản lý sự kiện
 - **Quản lý giải đấu**: Truy cập /admin/tournaments để tạo và quản lý giải đấu
